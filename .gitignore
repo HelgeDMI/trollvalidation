@@ -1,0 +1,6 @@
+*.pyc
+.idea/
+doc/.ipynb_checkpoints/
+MANIFEST
+trollvalidation.egg-info/
+.DS_Store
