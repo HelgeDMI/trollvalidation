@@ -1,11 +1,14 @@
-import os
 import gzip
-import uuid
 import logging
-import configuration as cfg
-import pyresample as pr
+import os
+import shutil
+import uuid
 from zipfile import ZipFile
 
+import pandas as pd
+import pyresample as pr
+
+from trollvalidation.validations import configuration as cfg
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
@@ -30,6 +33,28 @@ class TmpFiles(object):
 
     def cleanup(self):
         map(os.remove, self.files)
+
+
+def cleanup(_, tmp_files):
+    # Delete files first and the remove directories
+    for tmp_file in tmp_files:
+        if os.path.isfile(tmp_file):
+            LOG.info("Cleaning up... {0}".format(tmp_file))
+            os.remove(tmp_file)
+    for tmp_folder in tmp_files:
+        if os.path.exists(tmp_folder):
+            LOG.info("Cleaning up... {0}".format(tmp_folder))
+            shutil.rmtree(tmp_folder)
+
+
+def write_to_csv(results, description_str=''):
+    if cfg.CSV_HEADER:
+        df = pd.DataFrame(results, index=zip(*results)[0],
+                          columns=cfg.CSV_HEADER)
+    else:
+        df = pd.DataFrame(results, index=zip(*results)[0])
+    df.to_csv(os.path.join(cfg.OUTPUT_DIR, '{0}_results.csv'.format(
+        description_str)))
 
 
 def get_area_def(file_handle):

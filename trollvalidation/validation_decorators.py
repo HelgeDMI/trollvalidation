@@ -5,12 +5,16 @@ import time
 import logging
 from functools import wraps
 from funcsigs import signature
+from collections import namedtuple
 
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
+
+
+PreReturn = namedtuple('PreReturn', 'tmpfiles data_eval data_orig')
 
 
 def timethis(func):
@@ -21,7 +25,7 @@ def timethis(func):
         end_time = time.time()
         d_time = end_time - start_time
         ref_time = args[0]
-        LOG.info("Val. of {0} took {1}.".format(ref_time, d_time))
+        LOG.info("Validation for {0} took {1}s.".format(ref_time, d_time))
         return result
 
     return wrapper
@@ -46,15 +50,19 @@ def around_step(pre_func=None, post_func=None):
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            ref_time, ice_chart_file, product_file = args[0], args[1], args[2]
-            results = pre_actions(ref_time, ice_chart_file, product_file)
+            try:
+                ref_time, ice_chart_file, product_file = args[0], args[1], args[2]
+                results = pre_actions(ref_time, ice_chart_file, product_file)
 
-            temp_files = results.tmpfiles
-            data_eval, data_orig = results.data_eval, results.data_orig
+                temp_files = results.tmpfiles
+                data_eval, data_orig = results.data_eval, results.data_orig
 
-            results = func(ref_time, data_eval, data_orig)
-            post_actions(results, temp_files.tmpfiles)
-            return results
+                results = func(ref_time, data_eval, data_orig)
+                post_actions(results, temp_files.tmpfiles)
+
+                return results
+            except Exception, e:
+                LOG.exception(e)
 
         return wrapper
 

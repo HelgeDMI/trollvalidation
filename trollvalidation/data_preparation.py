@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
-def handle_shapefile(shp_file, orig_file, temp_files):
+def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     """
     This function reprojects, rasterizes, and decodes NIC ice charts
     in shapefile format.
@@ -74,26 +74,26 @@ def handle_shapefile(shp_file, orig_file, temp_files):
 
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
-    eval_data = decoder.sigrid_decoding(eval_data, orig_file)
+    eval_data = decoder.sigrid_decoding(eval_data, orig_data)
 
     return eval_data
 
 
-def handle_binfile(bin_file, orig_file):
+def handle_binfile(bin_file, orig_file, orig_data):
     bin_reader = BINFileReader()
     eval_file_data = bin_reader.read_data(bin_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    eval_data = decoder.sigrid_decoding(eval_file_data, orig_file)
+    eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
     return eval_data
 
 
-def handle_sigfile(sig_file, orig_file):
+def handle_sigfile(sig_file, orig_file, orig_data):
     sig_reader = SIGFileReader()
     eval_file_data = sig_reader.read_data(sig_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    eval_data = decoder.sigrid_decoding(eval_file_data, orig_file)
+    eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
     return eval_data
 
 

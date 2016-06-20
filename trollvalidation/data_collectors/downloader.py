@@ -1,16 +1,15 @@
-import os
-import sys
-import urllib
-import logging
-import multiprocessing as mp
-import shlex
-import json
-import re
 import datetime
-from urllib2 import urlopen
-import configuration as cfg
-
+import json
+import logging
+import os
+import re
+import shlex
+import sys
+import urllib2
 from subprocess import Popen, PIPE
+from urllib2 import urlopen
+
+from trollvalidation.validations import configuration as cfg
 
 LOG = logging.getLogger('nic_downloader')
 
@@ -22,8 +21,15 @@ def get(remote_file, local_path=cfg.INPUT_DIR, report_hook=None):
     if not os.path.isfile(target):
         LOG.info('Download {0} to {1}'.format(remote_file, target))
         try:
-            urllib.urlretrieve(remote_file, filename=target,
-                               reporthook=report_hook)
+            # Replaced urlretrieve as it did not close connections properly,
+            # so there remained to many open preventing the rest of the
+            # validation step to pass
+            # urllib.urlretrieve(remote_file, filename=target,
+            #                    reporthook=report_hook)
+
+            remote_file_content = urllib2.urlopen(remote_file)
+            with open(target, 'wb') as output:
+                output.write(remote_file_content.read())
         except IOError, e:
             LOG.exception(e)
             LOG.error('Could not download file {0}'.format(remote_file))

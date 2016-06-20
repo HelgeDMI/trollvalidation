@@ -1,13 +1,14 @@
-import re
-import os
+import datetime as dt
 import json
 import logging
-import datetime as dt
-import configuration as cfg
+import os
+import re
 from collections import OrderedDict
+
 from data_collectors import downloader
 from dateutil import parser
 
+from trollvalidation.validations import configuration as cfg
 
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,

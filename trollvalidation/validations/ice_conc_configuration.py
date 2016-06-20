@@ -4,7 +4,7 @@ import datetime
 # for OSI-409 validation
 # YEARS_OF_INTEREST = range(1972, 2017)
 # for OSI-401 validation
-YEARS_OF_INTEREST = [1980]
+YEARS_OF_INTEREST = [2014]
 
 CSV_HEADER = ['reference_time', 'run_time', 'total_bias', 'ice_bias',
               'water_bias', 'total_stddev', 'ice_stddev', 'water_stddev',
@@ -15,7 +15,7 @@ END_YEAR = max(YEARS_OF_INTEREST)
 if END_YEAR == START_YEAR:
     END_YEAR += 1
 
-BASE_PATH = os.path.join(os.path.expanduser("~"), 'data-validation')
+BASE_PATH = os.path.join(os.sep, 'data', 'rhp', 'data-validation')
 INPUT_DIR = os.path.join(BASE_PATH, 'input')
 # for OSI-409 validation
 OUTPUT_DIR = os.path.join(BASE_PATH, 'output')
@@ -86,7 +86,7 @@ NIC_SHP_DOWNL = {
         'sh': r'href\s?=\s?".*antarc\d{6}.zip',
     },
     'remote_date_pattern': (r'\d{6}', '%y%m%d'),
-    'glob_file': os.path.join(TMP_DIR, '/nic_shp_files.json')
+    'glob_file': os.path.join(TMP_DIR, 'nic_shp_files.json')
 }
 
 
@@ -96,3 +96,9 @@ if not os.path.exists(OUTPUT_DIR):
     os.system('mkdir -p {0}'.format(OUTPUT_DIR))
 if not os.path.exists(TMP_DIR):
     os.system('mkdir -p {0}'.format(TMP_DIR))
+
+import apt
+cache = apt.Cache()
+if not cache['gdal-bin'].is_installed:
+    raise Exception('You have to have "gdal-bin" installed. Do "apt-get '
+                    'install gdal-bin"!')

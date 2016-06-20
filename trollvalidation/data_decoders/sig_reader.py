@@ -136,11 +136,8 @@ class SIGFileReader(object):
     def _reproject(self, input_file, product_file):
 
         target_area_def = util.get_area_def(product_file)
-        source_area_def = util.get_area_def(input_file)
 
         swath_def = pr.geometry.SwathDefinition(lons=self.lons, lats=self.lats)
-        # self.ice_codes = np.ma.array(self.ice_codes, mask=(self.ice_codes >
-        #  100))
         swath_con = pr.image.ImageContainerNearest(self.ice_codes, swath_def,
                                                    radius_of_influence=50000)
         area_con = swath_con.resample(target_area_def)

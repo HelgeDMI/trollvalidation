@@ -65,5 +65,5 @@ class BINFileReader(object):
         return result.image_data
 
     def read_data(self, input_file, product_file):
-        _ = self._read_bin_file(input_file)
+        self.data = self._read_bin_file(input_file)
         return self._reproject(input_file, product_file)
