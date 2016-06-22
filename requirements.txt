@@ -1,1 +1,4 @@
 pyresample
+funcsigs
+numpy
+pandas
