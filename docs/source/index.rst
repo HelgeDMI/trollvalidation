@@ -6,12 +6,9 @@
 Welcome to trollvalidation's documentation!
 ===========================================
 
-trollvalidation is a Python package for implementing validations
-particularly of products derived meteorological satellite data.
+`trollvalidation` is a Python package for implementing validations particularly of products derived meteorological satellite data.
 
-trollvalidation does not provide a strict framework for implementing
-validations. Instead, it is more a collection of helper functions and
--together with this documentation- provides a collection of best practices.
+`trollvalidation` does not provide a strict framework for implementing validations. Instead, it is more a collection of helper functions and -together with this documentation- provides a collection of best practices.
 
 
 
@@ -24,6 +21,8 @@ Contents:
    running
    architecture
    own_validation
+   ice_conc
+   guidelines
 
 
 Indices and tables
