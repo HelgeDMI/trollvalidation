@@ -22,17 +22,16 @@ The current validation system allows for downloading files from FTP servers for 
 
 .. code-block:: python
 
-
-NIC_BIN_DOWNL = {
-    'protocol': 'ftp://',
-    'host': 'your.fileserver.org',
-    'remote_dir_f_pattern': 'pub/datasets/file_*_.bin',
-    'remote_date_pattern': (r'\d{4}_\d{2}_\d{2}', '%Y_%m_%d'),
-    'glob_file': os.path.join(TMP_DIR, 'your_files.json'),
-    'port': 2051,
-    'user': 'your_user_name',
-    'pwd': 'your_password'
-}
+	NIC_BIN_DOWNL = {
+	    'protocol': 'ftp://',
+	    'host': 'your.fileserver.org',
+	    'remote_dir_f_pattern': 'pub/datasets/file_*_.bin',
+	    'remote_date_pattern': (r'\d{4}_\d{2}_\d{2}', '%Y_%m_%d'),
+	    'glob_file': os.path.join(TMP_DIR, 'your_files.json'),
+	    'port': 2051,
+	    'user': 'your_user_name',
+	    'pwd': 'your_password'
+	}
 
 
 
