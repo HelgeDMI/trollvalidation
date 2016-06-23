@@ -1,10 +1,11 @@
 How do I write my own validation?
 =================================
 
-  * Start form an existing validation and adapt it to your needs.
+  * Start from an existing validation and adapt it to your needs.
   * Create a `your_validation_configuration.py` file, which points to the various data sources, and local paths.
   * Make the global configuration file `configuration.py` point to your configuration file. (echo "from your_configuration import *" > ./validations/configuration.py)
   * Implement your own validation in `your_validation.py`.
+    
     * Start by implementing a *pre-validation task*, e.g., a time series generator. The current time series generator `data_collectors/tseries_generator.py` allows for globbing from FTP servers and globbing via scraping from HTTP pages. It expects that the evaluation and original data contains some form of a timestamp in the filename.
     * The time series generator has to return a a list of tuples of the form `[(timestamp_str, eval_data_url, orig_data_url), ...]`
     * Implement a *pre-validation step*, i.e., a subprogram, which prepares the evaluation and the original data for validation. That is, implement a program, which downloads each file type, uncompresses them if necessary, and reads the data out of the files.
