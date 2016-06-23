@@ -61,4 +61,4 @@ python ./valdations/your_validation.py
 How do I implement my own validations?
 ======================================
 
-Read more about implementing your own validations and the systems architecture in the `docs` folder. As soon as the documentation is finalized, it will be moved to readthedocs.
+Read more about implementing your own validations and the systems architecture in the `docs` folder. As soon as the documentation is finalized, it will be moved to readthedocs. Note, currently the documentation is unstable but I am working on it...

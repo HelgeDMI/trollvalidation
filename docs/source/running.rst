@@ -79,4 +79,4 @@ and run the validation.
   python ./validations/ice_conc_validation.py
 
 
-Note, to run the validation you have to have `gdal-bin` installed with support for NetCDF files. If you are on a system, which uses `apt`for package management, then the configuration file should check that for you and should exit if you have not, see `ice_conc_configuration.py`. The ice concentration validation is a more complete example, which can be used for adaption when implementing your validation. A more detailed description of the ice concentration validation can be found [here]().
+Note, to run the validation you have to have `gdal-bin` installed with support for NetCDF files and you have to have `lftp` installed. If you are on a system, which uses `apt`for package management, then the configuration file should check that for you and should exit if you have not, see `ice_conc_configuration.py`. The ice concentration validation is a more complete example, which can be used for adaption when implementing your validation. A more detailed description of the ice concentration validation can be found [here]().

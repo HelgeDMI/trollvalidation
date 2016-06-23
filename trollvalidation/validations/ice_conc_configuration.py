@@ -102,3 +102,6 @@ cache = apt.Cache()
 if not cache['gdal-bin'].is_installed:
     raise Exception('You have to have "gdal-bin" installed. Do "apt-get '
                     'install gdal-bin"!')
+if not cache['lftp'].is_installed:
+    raise Exception('You have to have "lftp" installed. Do "apt-get '
+                    'install lftp"!')
