@@ -84,8 +84,8 @@ def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
 #                      np.array([1, 2, 3, 4]))
 
 
-def val_step_star(func, input_tuple):
-    return func(*input_tuple)
+def val_step_star(input_tuple):
+    return ice_conc_val_step(*input_tuple)
 
 
 @timethis
