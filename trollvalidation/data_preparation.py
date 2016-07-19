@@ -48,15 +48,15 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
                        reproj_filename.replace('.shp', '.prj')])
 
     # rasterize/grid shapefile:
-    layer = os.path.basename(shp_file).replace('.shp', '')
+    layer = os.path.basename(reproj_filename).replace('.shp', '')
     area_extent = str(target_area_def.area_extent).strip('()')
     x_size = target_area_def.x_size
     y_size = target_area_def.y_size
-    netcdf_file = shp_file.replace('.shp', '.nc')
+    netcdf_file = reproj_filename.replace('.shp', '.nc')
     command = 'gdal_rasterize -l {0} -of NetCDF -init 200 -a_nodata 200 ' \
               '-where "CT IS NOT NULL" -te {1} -ts {2} {3} -ot Byte ' \
               '-a CT {4} {5}'.format(layer, area_extent, x_size, y_size,
-                                     shp_file, netcdf_file)
+                                     reproj_filename, netcdf_file)
     try:
         # call the actual conversion to NetCDF file
         LOG.info('Rasterizing shapefile to {0}'.format(netcdf_file))
