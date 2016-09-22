@@ -1,8 +1,8 @@
 import os
 import datetime
 
-# for OSI-409 validation
-# YEARS_OF_INTEREST = range(1972, 2017)
+# for OSI-450 validation
+# YEARS_OF_INTEREST = range(1978, 2016)
 # for OSI-401 validation
 YEARS_OF_INTEREST = [2014]
 
@@ -15,7 +15,7 @@ END_YEAR = max(YEARS_OF_INTEREST)
 if END_YEAR == START_YEAR:
     END_YEAR += 1
 
-BASE_PATH = os.path.join(os.sep, 'data', 'rhp', 'data-validation')
+BASE_PATH = os.path.join('home', 'vagrant', 'validation', 'data')
 INPUT_DIR = os.path.join(BASE_PATH, 'input')
 # for OSI-409 validation
 OUTPUT_DIR = os.path.join(BASE_PATH, 'output')
@@ -24,6 +24,10 @@ OUTPUT_DIR = os.path.join(BASE_PATH, 'output')
 TMP_DIR = os.path.join(BASE_PATH, 'input', 'tmp')
 
 AREAS = 'etc/areas.cfg'
+DESCRIPTION = 'Comparison of NIC ice charts and OSI-450 products for {0}' \
+' hemisphere'
+SHORT_DESCRIPTION = 'OSI450_validation_{0}_{1}'  # hemisphere, date
+
 
 # for OSI-409 validation
 METNO_DOWNL = {

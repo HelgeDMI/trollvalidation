@@ -5,3 +5,5 @@ docs/build/
 MANIFEST
 trollvalidation.egg-info/
 .DS_Store
+vm/.vagrant
+vm/*.log

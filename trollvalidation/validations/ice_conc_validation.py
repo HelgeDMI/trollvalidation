@@ -11,6 +11,8 @@ from trollvalidation.data_collectors import tseries_generator as ts
 from trollvalidation.validation_decorators import timethis, around_step, \
     around_task, PreReturn
 from trollvalidation.validation_utils import TmpFiles
+import configuration as config
+
 
 # LOG = mp.log_to_stderr()
 LOG = logging.getLogger(__name__)
@@ -24,7 +26,7 @@ def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
     Functions like this are expected to return an instance of PreReturn.
     """
     temp_files = TmpFiles()
-    
+
     def prepare_orig_data():
         """
         This function describes how to come from a URL identifying an input
@@ -118,12 +120,10 @@ def ice_conc_val_task(file_pairs, description='', description_str=''):
 
 
 if __name__ == '__main__':
-    desc = 'Comparison of NIC ice charts and OSI-409 products for northern ' \
-           'hemisphere'
-    desc_str = 'OSI401_validation_NH_{0}'.format(date.today())
+    desc = config.DESCRIPTION.format('northern')
+    desc_str = config.SHORT_DESCRIPTION.format('NH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
 
-    desc = 'Comparison of NIC ice charts and OSI-409 products for southern ' \
-           'hemisphere'
-    desc_str = 'OSI401_validation_SH_{0}'.format(date.today())
+    desc = config.DESCRIPTION.format('southern')
+    desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
