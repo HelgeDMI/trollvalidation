@@ -15,7 +15,7 @@ END_YEAR = max(YEARS_OF_INTEREST)
 if END_YEAR == START_YEAR:
     END_YEAR += 1
 
-BASE_PATH = os.path.join('home', 'vagrant', 'validation', 'data')
+BASE_PATH = os.path.join(os.path.expanduser('~/'), 'validation', 'data')
 INPUT_DIR = os.path.join(BASE_PATH, 'input')
 # for OSI-409 validation
 OUTPUT_DIR = os.path.join(BASE_PATH, 'output')

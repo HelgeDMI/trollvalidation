@@ -1,7 +1,9 @@
 $script = <<SCRIPT
+sudo locale-gen UTF-8
 sudo apt-get -y install python-pip git
-sudo apt-get -y install python-dev libnetcdf-dev
+sudo apt-get -y install python-dev libnetcdf-dev libhdf5-dev
 sudo apt-get -y install gdal-bin lftp
+sudo apt-get -y install python-distutils-extra
 
 sudo pip install suplemon
 
@@ -9,30 +11,35 @@ echo "Creating directories for validation data..."
 mkdir -p validation/data/input/tmp
 mkdir -p validation/data/output
 
-echo "Setting up Python environment..."
-sudo pip install virtualenvwrapper
-export WORKON_HOME=~/.virtualenvs
-echo '. /usr/local/bin/virtualenvwrapper.sh' >> ~/.bashrc
-source ~/.bashrc
-mkvirtualenv validation
-# mkvirtualenv --system-site-packages validation
-workon validation
+curl -sL https://raw.githubusercontent.com/brainsik/virtualenv-burrito/master/virtualenv-burrito.sh | $SHELL
+source /home/vagrant/.venvburrito/startup.sh
 
+mkvirtualenv validation
+
+echo "Setting up Python environment..."
 pip install pyresample
+pip install pykdtree
 pip install funcsigs
 pip install numpy
 pip install pandas
 pip install netCDF4
+pip install ipython[notebook]
+toggleglobalsitepackages
+pip install python-apt
 
 echo "Cloning from Github..."
 cd validation
 git clone https://github.com/HelgeDMI/trollvalidation.git
 
-add2virtualenv ./trollvalidation/
+# workon validation
+# add2virtualenv ./trollvalidation/trollvalidation/
+# add2virtualenv does not seem to work...
+sed -i '/^import sys; sys.__plen = len(sys.path)/a\/home/vagrant/validation/trollvalidation' ~/.virtualenvs/validation/lib/python2.7/site-packages/_virtualenv_path_extensions.pth
 
-cd trollvalidation
-# python trollvalidation/validations/ice_conc_validation.py
-
+echo "Now do:"
+echo "add2virtualenv ~/validation/trollvalidation"
+echo "cd validation/trollvalidation/trollvalidation"
+echo "python validations/ice_conc_validation.py"
 SCRIPT
 
 
@@ -46,9 +53,10 @@ Vagrant.configure(2) do |config|
 
     # Customize the amount of memory on the VM:
     vb.memory = "2048"
+    vb.cpus = "2"
     vb.name = "validation-trusty"
   end
-  config.vm.provision "shell", inline: $script
+  config.vm.provision "shell", inline: $script, privileged: false
 
   # config.vm.network "forwarded_port", guest: 80, host: 8000
   # config.vm.network "public_network"
