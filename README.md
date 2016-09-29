@@ -36,7 +36,7 @@ add2virtualenv /path/to/trollvalidation
 
 ## I want to start now!
 
-Use Vagrant and the 'vm/Vagrantfile'. That is, you have to have Vagrant and VirtualBox installed on your machine. Then do:
+Use Vagrant and the `vm/Vagrantfile`. That is, you have to have Vagrant and VirtualBox installed on your machine. Then do:
 
 ```bash
 git clone https://github.com/HelgeDMI/trollvalidation.git
