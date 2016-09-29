@@ -4,8 +4,8 @@
 
 
 
-Install
-=======
+# Install
+
 
 Currently, the project is not on PyPi. So either install it manually by
 
@@ -32,6 +32,24 @@ Subsequently, add `trollvalidation` to your Python path. In case you are using `
 
 ```bash
 add2virtualenv /path/to/trollvalidation
+```
+
+## I want to start now!
+
+Use Vagrant and the 'vm/Vagrantfile'. That is, you have to have Vagrant and VirtualBox installed on your machine. Then do:
+
+```bash
+git clone https://github.com/HelgeDMI/trollvalidation.git
+cd vm
+vagrant up
+vagrant ssh
+```
+
+And on the VM do:
+
+```bash
+cd ~/valdation/trollvalidation/trollvalidation/
+python ./valdations/your_validation.py
 ```
 
 
