@@ -39,6 +39,7 @@ sed -i '/^import sys; sys.__plen = len(sys.path)/a\/home/vagrant/validation/trol
 echo "Now do:"
 echo "add2virtualenv ~/validation/trollvalidation/trollvalidation"
 echo "cd validation/trollvalidation/trollvalidation"
+echo "workon validation"
 echo "python validations/ice_conc_validation.py"
 SCRIPT
 

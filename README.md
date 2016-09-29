@@ -72,6 +72,7 @@ Usage
 
 ```bash
 cd /path/to/trollvalidation/trollvalidation/
+workon validation
 python ./valdations/your_validation.py
 ```
 
