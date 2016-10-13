@@ -112,11 +112,12 @@ def glob_all(host, remote_dir, user=None, pwd=None, port=None,
 
 def generate_all(protocol, host, remote_dir_f_pattern, date_range):
 
-    def gen_str(protocol, host, remote_pattern, d):
+    def gen_str(remote_pattern, d, h):
         date_str = datetime.datetime.strftime(d, '%Y%m%d')
-        return remote_pattern.format(d.year, d.month, h, date_str)
+        month_str = datetime.datetime.strftime(d, '%m')
+        return remote_pattern.format(d.year, month_str, h, date_str)
 
-    remote_file_list = [gen_str(protocol, host, remote_dir_f_pattern, d)
+    remote_file_list = [gen_str(remote_dir_f_pattern, d, h)
                         for d in date_range for h in ['n', 's']]
 
     return remote_file_list
