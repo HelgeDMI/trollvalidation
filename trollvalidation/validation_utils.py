@@ -78,6 +78,10 @@ def get_area_def(file_handle):
         cfg_id = 'EASE_NH'
     elif 'sh_ease-125' in file_name:
         cfg_id = 'EASE_SH'
+    elif 'nh_ease2-250' in file_name:
+        cfg_id = 'EASE2_NH'
+    elif 'sh_ease2-250' in file_name:
+        cfg_id = 'EASE2_SH'
     elif 'nic_weekly_' in file_name:
         cfg_id = 'NIC_EASE_NH'
     elif 'nh_polstere-100' in file_name:
