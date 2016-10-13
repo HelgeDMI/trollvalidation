@@ -132,13 +132,13 @@ def glob_file(cfg):
 
     if not os.path.isfile(cfg['glob_file']):
         if not cfg['scrape']:
-            if not cfg['generate']:
+            if not 'generate' in cfg.keys():
                 LOG.info('Globbing remote files from HTTP/FTP')
                 remote_files = glob_all(cfg['host'],
                                         cfg['remote_dir_f_pattern'],
                                         cfg['user'], cfg['pwd'], cfg['port'],
                                         cfg['protocol'])
-            elif cfg['generate']:
+            else:
                 remote_files = generate_all(cfg['protocol'], cfg['host'],
                                             cfg['remote_dir_f_pattern'],
                                             cfg['generate'])
