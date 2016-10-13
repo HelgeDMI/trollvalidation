@@ -110,10 +110,19 @@ def glob_all(host, remote_dir, user=None, pwd=None, port=None,
 
     return remote_file_list
 
+def generate_all(protocol, host, remote_dir_f_pattern, date_range):
+
+    remote_file_list = [os.path.join(protocol, host, remote_date_pattern.format(d.year, d.month, h, datetime.strftime(d, '%Y%m%d'))) for d in date_range, for h in ['n', 's']]
+
+    return remote_file_list
+
+
 
 def glob_file(cfg):
     if 'scrape' not in cfg.keys():
         cfg['scrape'] = False
+    if 'generate' not in cfg.keys():
+        cfg['generate'] = False
     if 'user' not in cfg.keys():
         cfg['user'] = None
     if 'pwd' not in cfg.keys():
@@ -123,12 +132,19 @@ def glob_file(cfg):
 
     if not os.path.isfile(cfg['glob_file']):
         if not cfg['scrape']:
-            LOG.info('Globbing remote files from HTTP/FTP')
-            remote_files = glob_all(cfg['host'], cfg['remote_dir_f_pattern'],
-                                    cfg['user'], cfg['pwd'], cfg['port'],
-                                    cfg['protocol'])
+            if not cfg['generate']:
+                LOG.info('Globbing remote files from HTTP/FTP')
+                remote_files = glob_all(cfg['host'],
+                                        cfg['remote_dir_f_pattern'],
+                                        cfg['user'], cfg['pwd'], cfg['port'],
+                                        cfg['protocol'])
+            elif cfg['generate']:
+                remote_files = generate_all(cfg['protocol'], cfg['host'],
+                                            cfg['remote_dir_f_pattern'],
+                                            cfg['generate'])
         elif cfg['scrape']:
             remote_files = scrape_all(cfg)
+
 
         # attach protocol and host
         remote_files = ['{0}{1}/{2}'.format(cfg['protocol'], cfg[

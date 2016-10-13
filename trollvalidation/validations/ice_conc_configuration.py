@@ -1,5 +1,6 @@
 import os
 import datetime
+import pandas as pd
 
 # for OSI-450 validation
 # YEARS_OF_INTEREST = range(1978, 2016)
@@ -91,6 +92,20 @@ NIC_SHP_DOWNL = {
     },
     'remote_date_pattern': (r'\d{6}', '%y%m%d'),
     'glob_file': os.path.join(TMP_DIR, 'nic_shp_files.json')
+}
+
+# http://thredds.met.no/thredds/dodsC/osisaf/met.no/ice/conc/2016/09/ice_conc_sh_polstere-100_multi_201609211200.nc
+METNO_THREDDS_DOWNL = {
+    'generate':
+        pd.date_range('1/1/{0} 12:00'.format(START_YEAR),
+                      '1/1/{0} 12:00'.format(END_YEAR), freq='D'),
+    'protocol': 'http://',
+    'host': 'thredds.met.no',
+    'remote_dir_f_pattern':
+    'thredds/dodsC/metusers/sicci_shared/v2.0draftA/{0}/{1}/' \
+    'ice_conc_{2}h_ease2-250_cdr-v2p0_{3}1200.nc',
+    'remote_date_pattern': (r'\d{12}', '%Y%m%d%H%M'),
+    'glob_file': os.path.join(TMP_DIR, 'metno_thredds_files.json')
 }
 
 

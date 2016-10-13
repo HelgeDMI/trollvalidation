@@ -34,13 +34,17 @@ def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
 
         :return: np.array | np.ma.array
         """
-        local_orig_file = downloader.get(orig_file, cfg.INPUT_DIR)
-        # uncompress file if necessary
-        local_orig_file_uncompressed, _ = util.uncompress(local_orig_file)
-        orig_data = prep.handle_osi_ice_conc_nc_file(
-            local_orig_file_uncompressed)
-
-        temp_files.append([local_orig_file_uncompressed, local_orig_file])
+        if not 'thredds' in orig_file:
+            # if the file is not on a thredds server download it...
+            local_orig_file = downloader.get(orig_file, cfg.INPUT_DIR)
+            # uncompress file if necessary
+            local_orig_file_uncompressed, _ = util.uncompress(local_orig_file)
+            orig_data = prep.handle_osi_ice_conc_nc_file(
+                local_orig_file_uncompressed)
+            temp_files.append([local_orig_file_uncompressed, local_orig_file])
+        else:
+            # otherwise give it directly to the Dataset reader
+            orig_data = prep.handle_osi_ice_conc_nc_file(orig_file)
 
         return orig_data
 

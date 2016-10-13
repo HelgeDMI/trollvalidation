@@ -128,7 +128,8 @@ def year_of_interest(el):
 def generate_time_series(description_str=''):
 
     # glob for all remote files
-    prd_files = downloader.glob_file(cfg.METNO_DOWNL)
+    prd_files = downloader.glob_file(cfg.METNO_THREDDS_DOWNL)
+    # prd_files = downloader.glob_file(cfg.METNO_DOWNL)
     shp_files = downloader.glob_file(cfg.NIC_SHP_DOWNL)
     bin_files = downloader.glob_file(cfg.NIC_BIN_DOWNL)
     sig_files = downloader.glob_file(cfg.NIC_SIG_DOWNL)
