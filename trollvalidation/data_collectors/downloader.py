@@ -112,7 +112,7 @@ def glob_all(host, remote_dir, user=None, pwd=None, port=None,
 
 def generate_all(protocol, host, remote_dir_f_pattern, date_range):
 
-    remote_file_list = [os.path.join(protocol, host, remote_date_pattern.format(d.year, d.month, h, datetime.strftime(d, '%Y%m%d'))) for d in date_range for h in ['n', 's']]
+    remote_file_list = [os.path.join(protocol, host, remote_dir_f_pattern.format(d.year, d.month, h, datetime.strftime(d, '%Y%m%d'))) for d in date_range for h in ['n', 's']]
 
     return remote_file_list
 
