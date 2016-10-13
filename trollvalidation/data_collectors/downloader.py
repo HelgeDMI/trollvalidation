@@ -114,13 +114,7 @@ def generate_all(protocol, host, remote_dir_f_pattern, date_range):
 
     def gen_str(protocol, host, remote_pattern, d):
         date_str = datetime.datetime.strftime(d, '%Y%m%d')
-        print(protocol, host, remote_pattern.format(d.year, d.month, h, date_str))
-
-        print(os.path.join(protocol, host,
-                            remote_pattern.format(d.year, d.month, h, date_str)))
-
-        return os.path.join(protocol, host,
-                            remote_pattern.format(d.year, d.month, h, date_str))
+        return remote_pattern.format(d.year, d.month, h, date_str)
 
     remote_file_list = [gen_str(protocol, host, remote_dir_f_pattern, d)
                         for d in date_range for h in ['n', 's']]
