@@ -48,14 +48,17 @@ def cleanup(_, tmp_files):
 
 
 def write_to_csv(results, description_str=''):
-    if cfg.CSV_HEADER:
-        df = pd.DataFrame(results, index=zip(*results)[0],
-                          columns=cfg.CSV_HEADER)
-    else:
-        df = pd.DataFrame(results, index=zip(*results)[0])
-    df.to_csv(os.path.join(cfg.OUTPUT_DIR, '{0}_results.csv'.format(
-        description_str)))
+    # prevent empty results "None" blocking the writing of CSV files
+    results = filter(lambda l: l, results)
 
+    if results:
+        if cfg.CSV_HEADER:
+            df = pd.DataFrame(results, index=zip(*results)[0],
+                              columns=cfg.CSV_HEADER)
+        else:
+            df = pd.DataFrame(results, index=zip(*results)[0])
+        df.to_csv(os.path.join(cfg.OUTPUT_DIR, '{0}_results.csv'.format(
+            description_str)))
 
 def get_area_def(file_handle):
     """
