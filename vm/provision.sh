@@ -1,4 +1,5 @@
-$script = <<SCRIPT
+#!/bin/bash
+
 sudo locale-gen UTF-8
 sudo apt-get -y install python-pip git
 sudo apt-get -y install python-dev libnetcdf-dev libhdf5-dev
@@ -41,25 +42,3 @@ echo "add2virtualenv ~/validation/trollvalidation/trollvalidation"
 echo "cd validation/trollvalidation/trollvalidation"
 echo "workon validation"
 echo "python validations/ice_conc_validation.py"
-SCRIPT
-
-
-Vagrant.configure(2) do |config|
-
-  config.vm.box = "ubuntu/trusty64"
-
-  config.vm.provider "virtualbox" do |vb|
-    # Display the VirtualBox GUI when booting the machine
-    # vb.gui = true
-
-    # Customize the amount of memory on the VM:
-    vb.memory = "2048"
-    vb.cpus = "2"
-    vb.name = "validation-trusty"
-  end
-  #config.vm.provision "shell", inline: $script, privileged: false
-  config.vm.provision "shell", path: "provision.sh"
-
-  # config.vm.network "forwarded_port", guest: 80, host: 8000
-  # config.vm.network "public_network"
-end
