@@ -127,8 +127,8 @@ def generate_all(protocol, host, remote_dir_f_pattern, date_range):
 def glob_file(cfg):
     if 'scrape' not in cfg.keys():
         cfg['scrape'] = False
-    if 'generate' not in cfg.keys():
-        cfg['generate'] = False
+    # if 'generate' not in cfg.keys():
+    #     cfg['generate'] = False
     if 'user' not in cfg.keys():
         cfg['user'] = None
     if 'pwd' not in cfg.keys():
