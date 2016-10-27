@@ -24,6 +24,7 @@ pip install funcsigs
 pip install numpy
 pip install pandas
 pip install netCDF4
+pip install h5py
 pip install ipython[notebook]
 toggleglobalsitepackages
 pip install python-apt
