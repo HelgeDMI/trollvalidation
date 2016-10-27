@@ -90,6 +90,47 @@ def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
 #                      np.array([1, 2, 3, 4]))
 
 
+def collect_pickled_data():
+    import os
+    import re
+    import h5py
+    import numpy as np
+    from glob import glob
+    from pandas import read_pickle
+
+    dir_ptn = '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
+    dir_ptn = os.path.join(cfg.OUTPUT_DIR, dir_ptn)
+    nh_orig_files = sorted(glob(os.path.join(dir_ptn, '*NH_orig*.pkl')))
+    nh_eval_files = sorted(glob(os.path.join(dir_ptn, '*NH_eval*.pkl')))
+    sh_orig_files = sorted(glob(os.path.join(dir_ptn, '*SH_orig*.pkl')))
+    sh_eval_files = sorted(glob(os.path.join(dir_ptn, '*SH_eval*.pkl')))
+
+    ds_source = [('data/NH/satellite', nh_orig_files),
+                 ('data/NH/reference', nh_eval_files),
+                 ('data/SH/satellite', sh_orig_files),
+                 ('data/SH/reference', sh_eval_files)]
+
+    def read_pkl(path):
+        date_str = re.search('\d{4}-\d{2}-\d{2}', path).group(0)
+        return date_str, read_pickle(path)
+
+    def stack_data(file_list):
+        dates_n_data = map(read_pkl, file_list)
+        dates, data = zip(*dates_n_data)
+        return dates, np.dstack(data)
+
+    path_to_output = os.path.join(cfg.OUTPUT_DIR, cfg.PICKLED_DATA)
+    hdf5 = h5py.File(path_to_output, 'w')
+    data_grp = hdf5.create_group('maps')
+    for ds_name, files in ds_source:
+        dates, data = stack_data(files)
+        ds = data_grp.create_dataset(ds_name, data.shape, data=data,
+                                     dtype='f', compression="gzip")
+        ds.attrs['dates'] = np.array(dates)
+    hdf5.close()
+
+
+
 def val_step_star(input_tuple):
     return ice_conc_val_step(*input_tuple)
 
@@ -131,3 +172,6 @@ if __name__ == '__main__':
     desc = config.DESCRIPTION.format('southern')
     desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
+
+    if cfg['PICKLED_DATA']:
+        collect_pickled_data()

@@ -5,7 +5,7 @@ import pandas as pd
 # for OSI-450 validation
 # YEARS_OF_INTEREST = range(1978, 2016)
 # for OSI-401 validation
-YEARS_OF_INTEREST = [2014]
+YEARS_OF_INTEREST = [1996]
 
 CSV_HEADER = ['reference_time', 'run_time', 'total_bias', 'ice_bias',
               'water_bias', 'total_stddev', 'ice_stddev', 'water_stddev',
@@ -28,7 +28,7 @@ AREAS = 'etc/areas.cfg'
 DESCRIPTION = 'Comparison of NIC ice charts and OSI-450 products for {0}' \
 ' hemisphere'
 SHORT_DESCRIPTION = 'OSI450_validation_{0}_{1}'  # hemisphere, date
-
+PICKLED_DATA = 'OSI450_val_data.hdf5'
 
 # for OSI-409 validation
 METNO_DOWNL = {
