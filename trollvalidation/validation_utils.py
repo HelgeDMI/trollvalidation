@@ -145,3 +145,28 @@ def uncompress(compressed_file, target=cfg.TMP_DIR):
         return unpacked_shapefile, [temporary_files_folder]
     else:
         return compressed_file, []
+
+
+def dump_data(ref_time, eval_data, orig_data, orig_file):
+    hemisphere = 'NH'
+    if '_sh_' in os.path.basename(orig_file) or \
+        '_SH_' in os.path.basename(orig_file):
+        hemisphere = 'SH'
+
+    out_path = os.path.join(cfg.OUTPUT_DIR, ref_time)
+
+    if not os.path.exists(out_path):
+        os.makedirs(out_path)
+
+    eval_data_img = Image.fromarray(eval_data.astype(np.uint8))
+
+    fname = os.path.join(out_path, '{0}_{1}_eval_data.bmp'.format(
+        eval_data, hemisphere))
+    eval_data_img.save(fname)
+    eval_data.dump(fname.replace('.bmp','.pkl'))
+
+    orig_data_img = Image.fromarray(orig_data.astype(np.uint8))
+    fname = os.path.join(out_path, '{0}_{1}_orig_data.bmp'.format(
+        orig_data, hemisphere))
+    orig_data_img.save(fname)
+    orig_data.dump(fname.replace('.bmp','.pkl'))

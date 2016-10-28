@@ -11,6 +11,7 @@ from trollvalidation.data_collectors import tseries_generator as ts
 from trollvalidation.validation_decorators import timethis, around_step, \
     around_task, PreReturn
 from trollvalidation.validation_utils import TmpFiles
+from trollvalidation.validation_utils import dump_data
 import configuration as config
 
 
@@ -79,6 +80,9 @@ def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
 
     orig_data = prepare_orig_data()
     eval_data = prepare_eval_data(orig_data)
+
+    # Dump data to files for later visualization
+    dump_data(ref_time, eval_data, orig_data, orig_file)
 
     return PreReturn(temp_files, eval_data, orig_data)
 
@@ -173,5 +177,5 @@ if __name__ == '__main__':
     desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
 
-    if cfg['PICKLED_DATA']:
+    if 'PICKLED_DATA' in cfg.keys():
         collect_pickled_data()
