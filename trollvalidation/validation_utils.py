@@ -3,6 +3,7 @@ import logging
 import os
 import shutil
 import uuid
+from PIL import Image
 from zipfile import ZipFile
 
 import pandas as pd
