@@ -177,5 +177,5 @@ if __name__ == '__main__':
     desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
 
-    if 'PICKLED_DATA' in cfg.keys():
+    if 'PICKLED_DATA' in cfg.__dict__.keys():
         collect_pickled_data()
