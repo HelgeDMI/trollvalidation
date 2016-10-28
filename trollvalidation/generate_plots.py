@@ -4,7 +4,7 @@
 
 import numpy as np
 import matplotlib
-matplotlib.use('cairo')
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
 import glob
@@ -170,7 +170,7 @@ def generate_plots_per_report(report):
     # read CSV file
     data = np.genfromtxt(report, delimiter=',', dtype="U75", skip_header=1)
 
-    fmt = '%Y-%m-%d %H:%M:%S'
+    fmt = '%Y-%m-%d'
     # to_float = lambda s: float(s or np.nan)
     # to_date = lambda s: datetime.strptime(s, fmt)
     # converters = {
