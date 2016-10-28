@@ -7,6 +7,7 @@ from PIL import Image
 from zipfile import ZipFile
 
 import pandas as pd
+import numpy as np
 import pyresample as pr
 
 from trollvalidation.validations import configuration as cfg
