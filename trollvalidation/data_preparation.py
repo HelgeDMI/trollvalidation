@@ -71,7 +71,8 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     # on my computer the image needs to be flipped upside down...
     # TODO: check if this is also necessary on other computers
     eval_data = np.flipud(dataset.variables['Band1'][:].astype(np.uint8))
-
+    print(np.flipud(dataset.variables['Band1'][:].min(), np.flipud(dataset.variables['Band1'][:].max())
+    print(eval_data.min(), eval_data.max())
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
     eval_data = decoder.sigrid_decoding(eval_data, orig_data)
@@ -114,7 +115,6 @@ def handle_osi_ice_conc_nc_file(input_file):
     """
     dataset = Dataset(input_file)
     ice_conc = dataset.variables['ice_conc'][0].data[:]
-    print(ice_conc.min(), ice_conc.max())
     status_flag = dataset.variables['status_flag'][0][:]
     ice_conc = np.ma.array(ice_conc, mask=(status_flag != 0))
     return ice_conc
