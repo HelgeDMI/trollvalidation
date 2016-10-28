@@ -6,7 +6,7 @@ import pandas as pd
 YEARS_OF_INTEREST = range(1992, 1994)
 # for OSI-401 validation
 # YEARS_OF_INTEREST = [1996]
-
+VALIDATION_ID = 'OSI450'
 CSV_HEADER = ['reference_time', 'run_time', 'total_bias', 'ice_bias',
               'water_bias', 'total_stddev', 'ice_stddev', 'water_stddev',
               'within_10pct', 'within_20pct']
