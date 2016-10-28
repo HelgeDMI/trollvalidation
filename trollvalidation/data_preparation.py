@@ -70,7 +70,7 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     dataset = Dataset(netcdf_file)
     # on my computer the image needs to be flipped upside down...
     # TODO: check if this is also necessary on other computers
-    eval_data = np.flipud(dataset.variables['Band1'][:]  #.astype(np.uint8))
+    eval_data = np.flipud(dataset.variables['Band1'][:])  #.astype(np.uint8))
 
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
