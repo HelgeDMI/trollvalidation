@@ -116,11 +116,15 @@ if not os.path.exists(OUTPUT_DIR):
 if not os.path.exists(TMP_DIR):
     os.system('mkdir -p {0}'.format(TMP_DIR))
 
-import apt
-cache = apt.Cache()
-if not cache['gdal-bin'].is_installed:
-    raise Exception('You have to have "gdal-bin" installed. Do "apt-get '
-                    'install gdal-bin"!')
-if not cache['lftp'].is_installed:
-    raise Exception('You have to have "lftp" installed. Do "apt-get '
-                    'install lftp"!')
+try:
+    import apt
+except Exception as e:
+    print("No python-apt installed, I wont check for gdal-bin and lftp...") 
+else:
+    cache = apt.Cache()
+    if not cache['gdal-bin'].is_installed:
+        raise Exception('You have to have "gdal-bin" installed. Do "apt-get '
+                        'install gdal-bin"!')
+    if not cache['lftp'].is_installed:
+        raise Exception('You have to have "lftp" installed. Do "apt-get '
+                        'install lftp"!')
