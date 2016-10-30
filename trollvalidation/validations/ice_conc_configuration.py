@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 
 # for OSI-450 validation
-YEARS_OF_INTEREST = range(1992, 1994)
+YEARS_OF_INTEREST = range(2010, 2015)
 # for OSI-401 validation
 # YEARS_OF_INTEREST = [1996]
 VALIDATION_ID = 'OSI450'
@@ -119,7 +119,7 @@ if not os.path.exists(TMP_DIR):
 try:
     import apt
 except Exception as e:
-    print("No python-apt installed, I wont check for gdal-bin and lftp...") 
+    print("No python-apt installed, I wont check for gdal-bin and lftp...")
 else:
     cache = apt.Cache()
     if not cache['gdal-bin'].is_installed:
