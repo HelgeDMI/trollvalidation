@@ -162,7 +162,7 @@ def ice_conc_val_task(file_pairs, description='', description_str=''):
     LOG.info(description_str)
 
     pool = mp.Pool(processes=mp.cpu_count())
-    results = pool.map(val_step_star, file_pairs[0:10])
+    results = pool.map(val_step_star, file_pairs)
     pool.close()
 
     return results
