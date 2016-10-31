@@ -10,7 +10,7 @@ from datetime import datetime
 import glob
 import os
 import logging
-import configuration as cfg
+import validations.configuration as cfg
 
 
 LOG = logging.getLogger(__name__)
