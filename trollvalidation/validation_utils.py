@@ -39,14 +39,15 @@ class TmpFiles(object):
 
 def cleanup(_, tmp_files):
     # Delete files first and the remove directories
-    for tmp_file in tmp_files:
-        if os.path.isfile(tmp_file):
-            LOG.info("Cleaning up... {0}".format(tmp_file))
-            os.remove(tmp_file)
-    for tmp_folder in tmp_files:
-        if os.path.exists(tmp_folder):
-            LOG.info("Cleaning up... {0}".format(tmp_folder))
-            shutil.rmtree(tmp_folder)
+    # for tmp_file in tmp_files:
+    #     if os.path.isfile(tmp_file):
+    #         LOG.info("Cleaning up... {0}".format(tmp_file))
+    #         os.remove(tmp_file)
+    # for tmp_folder in tmp_files:
+    #     if os.path.exists(tmp_folder):
+    #         LOG.info("Cleaning up... {0}".format(tmp_folder))
+    #         shutil.rmtree(tmp_folder)
+    pass
 
 
 def write_to_csv(results, description_str=''):

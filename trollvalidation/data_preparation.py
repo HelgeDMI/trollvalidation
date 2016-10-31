@@ -38,6 +38,7 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     cmd = cmd.format(proj_string, reproj_filename, shp_file)
     try:
         LOG.info('Reprojecting shapefile to {0}'.format(shp_file))
+        LOG.info('Executing: {0}'.format(cmd))
         os.system(cmd)
     except:
         raise Exception('ogr2ogr must be installed...')
@@ -60,6 +61,7 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     try:
         # call the actual conversion to NetCDF file
         LOG.info('Rasterizing shapefile to {0}'.format(netcdf_file))
+        LOG.info('Executing: {0}'.format(cmd))
         os.system(command)
     except:
         raise Exception('gdal_rasterize must be installed...')
@@ -71,9 +73,6 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     # on my computer the image needs to be flipped upside down...
     # TODO: check if this is also necessary on other computers
     eval_data = np.flipud(dataset.variables['Band1'][:]) #.astype(np.uint8))
-    print(eval_data.min().astype(np.uint8), eval_data.max().astype(np.uint8))
-
-    print(eval_data.min(), eval_data.max())
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
     eval_data = decoder.sigrid_decoding(eval_data, orig_data)
