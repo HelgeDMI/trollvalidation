@@ -85,7 +85,7 @@ def handle_binfile(bin_file, orig_file, orig_data):
     eval_file_data = bin_reader.read_data(bin_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
+    eval_data = decoder.decode_values(eval_file_data, orig_data)
     return eval_data
 
 
