@@ -102,7 +102,7 @@ METNO_THREDDS_DOWNL = {
     'protocol': 'http://',
     'host': 'thredds.met.no',
     'remote_dir_f_pattern':
-    'thredds/dodsC/metusers/sicci_shared/v2.0draftB/{0}/{1}/' \
+    'thredds/dodsC/metusers/sicci_shared/v2.0draftC/{0}/{1}/' \
     'ice_conc_{2}h_ease2-250_cdr-v2p0_{3}1200.nc',
     'remote_date_pattern': (r'\d{12}', '%Y%m%d%H%M'),
     'glob_file': os.path.join(TMP_DIR, 'metno_thredds_files.json')
