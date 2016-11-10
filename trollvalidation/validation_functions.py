@@ -77,3 +77,44 @@ def rmsdiff(data_eval, data_orig):
     rms = np.sqrt(sum_of_squares / float(data_orig.shape[0] *
                                          data_orig.shape[1]))
     return rms
+
+def ice_bias_for_high_in_eval(data_eval, data_orig):
+    mask_expr = ~((data_eval >= 90) * (data_eval < 100))
+    only_ice_in_chart = np.ma.array(data_eval, mask=mask_expr)
+    diff = data_orig - only_ice_in_chart
+    return diff.mean()
+
+
+def ice_std_dev_for_high_in_eval(data_eval, data_orig):
+    mask_expr = ~((data_eval >= 90) * (data_eval < 100))
+    only_ice_in_chart = np.ma.array(data_eval, mask=mask_expr)
+    diff = data_orig - only_ice_in_chart
+    return diff.std()
+
+
+def water_bias(data_eval, data_orig):
+    mask_expr = ~((data_eval >= 0) * (data_evel < 10))
+    only_water_in_chart = np.ma.array(data_eval, mask=mask_expr)
+    diff = data_orig - only_water_in_chart
+    return diff.mean()
+
+
+def water_std_dev(data_eval, data_orig):
+    mask_expr = ~((data_eval >= 0) * (data_evel < 10))
+    only_water_in_chart = np.ma.array(data_eval, mask=mask_expr)
+    diff = data_orig - only_water_in_chart
+    return diff.std()
+
+
+def intermediate_bias(data_eval, data_orig):
+    mask_expr = ~((data_eval >= 10) * (data_evel < 90))
+    intermediate_ice_in_chart = np.ma.array(data_eval, mask=mask_expr)
+    diff = data_orig - intermediate_ice_in_chart
+    return diff.mean()
+
+
+def intermediate_std_dev(data_eval, data_orig):
+    mask_expr = ~((data_eval >= 10) * (data_evel < 90))
+    intermediate_ice_in_chart = np.ma.array(data_eval, mask=mask_expr)
+    diff = data_orig - intermediate_ice_in_chart
+    return diff.std()
