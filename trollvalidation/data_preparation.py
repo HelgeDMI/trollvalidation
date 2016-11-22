@@ -116,6 +116,7 @@ def handle_osi_ice_conc_nc_file(input_file):
     dataset = Dataset(input_file)
     ice_conc = dataset.variables['ice_conc'][0].data[:]
     status_flag = dataset.variables['status_flag'][0][:]
-    filt = np.logical_or(status_flag & 1 == 1, np.logical_or(status_flag & 2 == 2, status_flag & 8 == 8))
-    ice_conc = np.ma.array(ice_conc, mask=filt)
+    mask_flags = np.logical_or.reduce((status_flag & 1 == 1, status_flag & 2 == 2, status_flag & 8 == 8))
+    mask_conc = np.logical_or(ice_conc < 0, ice_conc > 100)
+    ice_conc = np.ma.array(ice_conc, mask=(mask_flags | mask_conc))
     return ice_conc
