@@ -165,10 +165,10 @@ def dump_data(ref_time, eval_data, orig_data, orig_file):
     fname = os.path.join(out_path, '{0}_{1}_eval_data.bmp'.format(
         cfg.VALIDATION_ID, hemisphere))
     eval_data_img.save(fname)
-    eval_data.dump(fname.replace('.bmp','.pkl'))
+    eval_data.dump(fname.replace('.bmp', '.pkl'))
 
     orig_data_img = Image.fromarray(orig_data.astype(np.uint8))
     fname = os.path.join(out_path, '{0}_{1}_orig_data.bmp'.format(
         cfg.VALIDATION_ID, hemisphere))
     orig_data_img.save(fname)
-    orig_data.dump(fname.replace('.bmp','.pkl'))
+    orig_data.dump(fname.replace('.bmp', '.pkl'))

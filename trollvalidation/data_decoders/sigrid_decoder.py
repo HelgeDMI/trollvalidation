@@ -112,6 +112,7 @@ class DecodeSIGRIDCodes(object):
                     (data_orig <= (data_eval % 10) * 10)
         data_eval = np.where(condition, data_orig, data_eval)
 
+
         if was_masked:
             data_eval = np.ma.array(data_eval, mask=mask)
 

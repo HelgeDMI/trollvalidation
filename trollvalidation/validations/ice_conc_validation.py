@@ -1,6 +1,7 @@
 import logging
 import multiprocessing as mp
 from datetime import datetime, date
+import numpy.ma as ma
 
 import trollvalidation.data_preparation as prep
 import trollvalidation.validation_functions as val_func
@@ -128,6 +129,8 @@ def collect_pickled_data():
     data_grp = hdf5.create_group('maps')
     for ds_name, files in ds_source:
         dates, data = stack_data(files)
+        mask = ma.masked_where(data, np.logical_or(data < 0, data > 100))
+        data = ma.array(data, mask=mask, fill_value=-9999)
         ds = data_grp.create_dataset(ds_name, data.shape, data=data,
                                      dtype='f', compression="gzip")
         ds.attrs['dates'] = np.array(dates)

@@ -3,7 +3,7 @@ import datetime
 import pandas as pd
 
 # for OSI-450 validation
-YEARS_OF_INTEREST = range(2000, 2010)
+YEARS_OF_INTEREST = range(2000, 2006)
 # for OSI-401 validation
 # YEARS_OF_INTEREST = [1996]
 VALIDATION_ID = 'OSI450'
