@@ -78,15 +78,16 @@ def rmsdiff(data_eval, data_orig):
                                          data_orig.shape[1]))
     return rms
 
+
 def ice_bias_for_high_in_eval(data_eval, data_orig):
-    mask_expr = ~((data_eval >= 90) * (data_eval < 100))
+    mask_expr = ~((data_eval >= 90) * (data_eval <= 100))
     only_ice_in_chart = np.ma.array(data_eval, mask=mask_expr)
     diff = data_orig - only_ice_in_chart
     return diff.mean()
 
 
 def ice_std_dev_for_high_in_eval(data_eval, data_orig):
-    mask_expr = ~((data_eval >= 90) * (data_eval < 100))
+    mask_expr = ~((data_eval >= 90) * (data_eval <= 100))
     only_ice_in_chart = np.ma.array(data_eval, mask=mask_expr)
     diff = data_orig - only_ice_in_chart
     return diff.std()
