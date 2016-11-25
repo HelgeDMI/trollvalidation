@@ -14,9 +14,9 @@ from trollvalidation.validation_decorators import timethis, around_step, \
 import configuration as cfg
 
 LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                    format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
+#                     datefmt='%Y-%m-%d %H:%M:%S')
 
 cfg.CSV_HEADER = ['reference_time', 'run_time', 'my_val']
 

@@ -11,9 +11,9 @@ from data_decoders.sigrid_decoder import DecodeSIGRIDCodes
 
 
 LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                    format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
+#                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def handle_shapefile(shp_file, orig_file, orig_data, temp_files):

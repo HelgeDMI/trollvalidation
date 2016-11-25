@@ -1,19 +1,36 @@
 import numpy as np
+import logging
 
+LOG = logging.getLogger(__name__)
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
+#                     datefmt='%Y-%m-%d %H:%M:%S')
 
 class DecodeSIGRIDCodes(object):
+    # def decode_values(self, data_eval, product_file_data):
+    #     if data_eval[(data_eval > 10) & (data_eval < 90) & \
+    #             (data_eval % 10 == 5)].any():
+    #         print('File seems to contain ice concentrations in 5\% steps...')
+    #         print(data_eval[(data_eval > 10) & (data_eval < 90) & (data_eval
+    #                                                                % 10 == 5)])
+    #         return data_eval
+    #     else:
+    #         ease_as_sigrid_codes = self.ease_codes_to_sigrid_codes(data_eval)
+    #         decoded_ice_conc = self.sigrid_decoding(ease_as_sigrid_codes,
+    #                                                 product_file_data)
+    #         return decoded_ice_conc
+
     def decode_values(self, data_eval, product_file_data):
         if data_eval[(data_eval > 10) & (data_eval < 90) & \
                 (data_eval % 10 == 5)].any():
-            print('File seems to contain ice concentrations in 5\% steps...')
-            print(data_eval[(data_eval > 10) & (data_eval < 90) & (data_eval
-                                                                   % 10 == 5)])
-            return data_eval
+            LOG.info('File contains ice concentrations in 5% steps: {0}'.format(np.unique(data_eval)))
         else:
-            ease_as_sigrid_codes = self.ease_codes_to_sigrid_codes(data_eval)
-            decoded_ice_conc = self.sigrid_decoding(ease_as_sigrid_codes,
-                                                    product_file_data)
-            return decoded_ice_conc
+            LOG.info('File contains ice concentrations in these steps {0}'.format(np.unique(data_eval)))
+        ease_as_sigrid_codes = self.ease_codes_to_sigrid_codes(data_eval)
+        decoded_ice_conc = self.sigrid_decoding(ease_as_sigrid_codes,
+                                                product_file_data)
+        return decoded_ice_conc
+
 
     def ease_codes_to_sigrid_codes(self, data_eval):
         data_eval[data_eval == 5] = 1

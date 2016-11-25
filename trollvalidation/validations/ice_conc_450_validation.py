@@ -19,7 +19,7 @@ import configuration as config
 # LOG = mp.log_to_stderr()
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
-                    format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
+                    format='[%(process)d: %(levelname)s: %(asctime)s: %(name)s] %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
@@ -167,6 +167,7 @@ def ice_conc_val_task(file_pairs, description='', description_str=''):
     LOG.info(description_str)
 
     pool = mp.Pool(processes=mp.cpu_count())
+    # pool = mp.Pool(processes=1)
     results = pool.map(val_step_star, file_pairs)
     pool.close()
 

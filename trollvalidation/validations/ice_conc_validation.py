@@ -18,9 +18,9 @@ import configuration as config
 
 # LOG = mp.log_to_stderr()
 LOG = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                    format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
-                    datefmt='%Y-%m-%d %H:%M:%S')
+# logging.basicConfig(level=logging.DEBUG,
+#                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
+#                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
