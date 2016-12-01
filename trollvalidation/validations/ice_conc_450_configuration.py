@@ -3,9 +3,9 @@ import datetime
 import pandas as pd
 
 # for OSI-450 validation
-YEARS_OF_INTEREST = range(1979, 2016)
+# YEARS_OF_INTEREST = range(1979, 2016)
 # for OSI-401 validation
-# YEARS_OF_INTEREST = [2006]
+YEARS_OF_INTEREST = [2000]
 VALIDATION_ID = 'OSI450'
 CSV_HEADER = ['reference_time', 'run_time', 'intermediate_bias', 'ice_bias',
               'water_bias', 'intermediate_stddev', 'ice_stddev', 'water_stddev',
