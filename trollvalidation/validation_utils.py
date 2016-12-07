@@ -100,7 +100,7 @@ def get_area_def(file_handle):
         raise ValueError('No matching region for file {0}'.format(
             file_handle))
 
-    return pr.utils.parse_area_file('etc/areas.cfg', cfg_id)[0]
+    return pr.utils.parse_area_file('trollvalidation/etc/areas.cfg', cfg_id)[0]
 
 
 def uncompress(compressed_file, target=cfg.TMP_DIR):

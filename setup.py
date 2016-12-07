@@ -12,7 +12,7 @@ setup(name='trollvalidation',
       install_requires=requirements,
       package_data={
         '': [
-            'etc/areas.cfg',]
+            'trollvalidation/etc/areas.cfg',]
       },
       zip_safe=False,
       classifiers=[

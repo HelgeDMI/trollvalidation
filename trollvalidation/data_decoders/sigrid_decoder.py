@@ -1,70 +1,47 @@
 import numpy as np
+from numpy import ma
 import logging
 
 LOG = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.DEBUG,
-#                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
-#                     datefmt='%Y-%m-%d %H:%M:%S')
+
 
 class DecodeSIGRIDCodes(object):
-    # def decode_values(self, data_eval, product_file_data):
-    #     if data_eval[(data_eval > 10) & (data_eval < 90) & \
-    #             (data_eval % 10 == 5)].any():
-    #         print('File seems to contain ice concentrations in 5\% steps...')
-    #         print(data_eval[(data_eval > 10) & (data_eval < 90) & (data_eval
-    #                                                                % 10 == 5)])
-    #         return data_eval
-    #     else:
-    #         ease_as_sigrid_codes = self.ease_codes_to_sigrid_codes(data_eval)
-    #         decoded_ice_conc = self.sigrid_decoding(ease_as_sigrid_codes,
-    #                                                 product_file_data)
-    #         return decoded_ice_conc
-
     def decode_values(self, data_eval, product_file_data):
-        ease_as_sigrid_codes = self.ease_codes_to_sigrid_codes(data_eval)
-        decoded_ice_conc = self.sigrid_decoding(ease_as_sigrid_codes,
+        try:
+            sigrid_codes = self.bin_intervals_to_sigrid_codes(data_eval)
+            LOG.info('NIC files contain concentration intervals')
+        except ValueError:
+            sigrid_codes = data_eval
+            LOG.info('NIC files contain sigrid codes')
+
+        decoded_ice_conc = self.sigrid_decoding(sigrid_codes,
                                                 product_file_data)
         return decoded_ice_conc
 
-    # def decode_values(self, data_eval, product_file_data):
-    #     if data_eval[(data_eval > 10) & (data_eval < 90) & \
-    #             (data_eval % 10 == 5)].any():
-    #         LOG.info('File contains ice concentrations in 5% steps: {0}'.format(np.unique(data_eval)))
-    #     else:
-    #         LOG.info('File contains ice concentrations in these steps {0}'.format(np.unique(data_eval)))
-    #     ease_as_sigrid_codes = self.ease_codes_to_sigrid_codes(data_eval)
-    #     decoded_ice_conc = self.sigrid_decoding(ease_as_sigrid_codes,
-    #                                             product_file_data)
-    #     return decoded_ice_conc
-
-
-    # def ease_codes_to_sigrid_codes(self, data_eval):
-    #     data_eval[data_eval == 5] = 1
-    #     data_eval[data_eval == 95] = 91
-    #     data_eval[data_eval == 100] = 92
-    #     return data_eval
-
-    def ease_codes_to_sigrid_codes(self, data_eval):
-        expected_vals = [0.0, 5.0, 15.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 95.0, 100.0, np.ma.core.MaskedConstant]
+    def bin_intervals_to_sigrid_codes(self, data_eval):
+        expected_vals = [0.0, 5.0, 15.0, 20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 95.0, 100.0]
         vals = np.unique(data_eval)
         for v in vals:
             if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
                 raise ValueError('Value {0} was not expected'.format(v))
 
-        data_eval[data_eval == 5] = 1
-        data_eval[data_eval == 15] = 2  # TODO: This is just a guess
-        data_eval[data_eval == 20] = 13
-        data_eval[data_eval == 20] = 13
-        data_eval[data_eval == 30] = 24
-        data_eval[data_eval == 40] = 35
-        data_eval[data_eval == 50] = 46
-        data_eval[data_eval == 60] = 57
-        data_eval[data_eval == 70] = 68
-        data_eval[data_eval == 80] = 79
-        data_eval[data_eval == 90] = 81
-        data_eval[data_eval == 95] = 91
-        data_eval[data_eval == 100] = 92
-        return data_eval
+        codes = np.zeros(data_eval.shape)
+        codes.fill(np.nan)
+        codes[data_eval == 0] = 0
+        codes[data_eval == 5] = 1
+        codes[data_eval == 15] = 2  # TODO: Check this
+        codes[data_eval == 20] = 13
+        codes[data_eval == 30] = 24
+        codes[data_eval == 40] = 35
+        codes[data_eval == 50] = 46
+        codes[data_eval == 60] = 57
+        codes[data_eval == 70] = 68
+        codes[data_eval == 80] = 79
+        codes[data_eval == 90] = 81
+        codes[data_eval == 95] = 91
+        codes[data_eval == 100] = 92
+        codes = ma.masked_invalid(codes)
+        return codes
 
     def sigrid_decoding(self, data_eval, data_orig):
         """
@@ -103,6 +80,12 @@ class DecodeSIGRIDCodes(object):
         #                      (data_eval / 10 >= data_eval % 10)].any() == False
 
         LOG.debug('data_eval unique values {}'.format(np.unique(data_eval)))
+
+        expected_vals = [0.0, 1.0, 2.0, 13.0, 24.0, 35.0, 46.0, 57.0, 68.0, 79.0, 81.0, 91.0, 92.0]
+        vals = np.unique(data_eval)
+        for v in vals:
+            if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
+                raise ValueError('Value {0} was not expected'.format(v))
 
         was_masked = False
         if isinstance(data_eval, np.ma.core.MaskedArray):
