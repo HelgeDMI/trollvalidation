@@ -138,21 +138,20 @@ class DecodeSIGRIDCodes(object):
         # Convert the sigrid codes to upper and lower limits of ice concentration
 
         de = data_eval
-        lc = 10*(de // 10)  # lower code: 1st digit * 10
-        uc = 10*(de % 10)   # upper code: 2nd digit * 10
+        lc = 10 * (de // 10)  # lower code: 1st digit * 10
+        uc = 10 * (de % 10)   # upper code: 2nd digit * 10
         condition_choices = [
             (de == 255, np.nan, np.nan),
             (de == 00, 0,  0),
             (de == 01, 0, 10),
             (de == 02, 0, 10),  # TODO: Check this
-            (de == 91, 90, 100),
             (de == 92, 100, 100),
             (uc == 10, lc, 100),        # 21, 31, 41, 51, 61, 71, 81, 91
-            (de % 10 == 0,    de, de),  # 10, 20, 30, 40, 50, 60, 70, 80, 90
+            (uc == 00, de, de),         # 10, 20, 30, 40, 50, 60, 70, 80, 90
             (~(de % 10 == 0), lc, uc)   # 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25,
-                                        # 26, 27, 28, 29, 30, 34, 35, 36, 37, 38, 39,
-                                        # 40, 45, 46, 47, 48, 49, 50, 56, 57, 58, 59,
-                                        # 67, 68, 69, 70, 78, 79, 89
+                                        # 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45,
+                                        # 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69,
+                                        # 78, 79, 89
         ]
         condition, lower_limit, upper_limit = zip(*condition_choices)
         lower_limits = np.select(condition, lower_limit)
