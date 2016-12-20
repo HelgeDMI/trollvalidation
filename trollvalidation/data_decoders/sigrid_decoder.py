@@ -90,19 +90,25 @@ class DecodeSIGRIDCodes(object):
         """
         de = data_eval
         # condition_choices is [(de == concentration_interval, sigrid_code), ...]
+        # condition_choice = [
+        #     (de == 0,    0),
+        #     (de == 5,    1),   # TODO: Check this. It can also be 2.
+        #     (de == 10,   2),   # TODO: Check this.
+        #     (de == 15,  255),  # TODO: This is wrong! What should it be?
+        #     (de == 20,  13),
+        #     (de == 30,  24),
+        #     (de == 40,  35),
+        #     (de == 50,  46),
+        #     (de == 60,  57),
+        #     (de == 70,  68),
+        #     (de == 80,  79),
+        #     (de == 90,  81),
+        #     (de == 95,  91),
+        #     (de == 100, 92),
+        #     (de == 99, 255)
+        # ]
         condition_choice = [
-            (de == 0,    0),
-            (de == 5,    1),   # TODO: Check this. It can also be 2.
-            (de == 10,   2),   # TODO: Check this.
-            (de == 15,  255),  # TODO: This is wrong! What should it be?
-            (de == 20,  13),
-            (de == 30,  24),
-            (de == 40,  35),
-            (de == 50,  46),
-            (de == 60,  57),
-            (de == 70,  68),
-            (de == 80,  79),
-            (de == 90,  81),
+            (de == 05,  01),   # TODO: Check this. It can also be 2.
             (de == 95,  91),
             (de == 100, 92),
             (de == 99, 255)
@@ -120,7 +126,10 @@ class DecodeSIGRIDCodes(object):
 
         # Check that there are no unexpected values
 
-        expected_vals = [0, 1, 2, 13, 24, 35, 46, 57, 68, 79, 81, 91, 92, 255]
+        expected_vals = [00, 01, 02, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 23, 24, 25,
+                         26, 27, 28, 29, 30, 34, 35, 36, 37, 38, 39, 40, 45, 46, 47, 48,
+                         49, 50, 56, 57, 58, 59, 60, 67, 68, 69, 70, 78, 79, 80, 89, 90,
+                         91, 92, 255]
         # Sometimes I also get 10, 20
         for v in np.unique(data_eval):
             if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
@@ -129,26 +138,30 @@ class DecodeSIGRIDCodes(object):
         # Convert the sigrid codes to upper and lower limits of ice concentration
 
         de = data_eval
-        # condition_choices is [(de == sigrid_code, lower_limit, upper_limit), ...]
+        lc = 10*(de // 10)  # lower code: 1st digit * 10
+        uc = 10*(de % 10)   # upper code: 2nd digit * 10
         condition_choices = [
-            (de == 00,   0,  0),
-            (de == 01,   0, 10),
-            (de == 02,   0, 10),  # TODO: Check this
-            (de == 13,  10, 30),
-            (de == 24,  20, 40),
-            (de == 35,  30, 50),
-            (de == 46,  40, 60),
-            (de == 57,  50, 70),
-            (de == 68,  60, 80),
-            (de == 79,  70, 90),
-            (de == 81,  80, 100),
-            (de == 91,  90, 100),
+            (de == 255, np.nan, np.nan),
+            (de == 00, 0,  0),
+            (de == 01, 0, 10),
+            (de == 02, 0, 10),  # TODO: Check this
+            (de == 91, 90, 100),
             (de == 92, 100, 100),
-            (de == 255, np.nan, np.nan)
+            (uc == 10, lc, 100),        # 21, 31, 41, 51, 61, 71, 81, 91
+            (de % 10 == 0,    de, de),  # 10, 20, 30, 40, 50, 60, 70, 80, 90
+            (~(de % 10 == 0), lc, uc)   # 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25,
+                                        # 26, 27, 28, 29, 30, 34, 35, 36, 37, 38, 39,
+                                        # 40, 45, 46, 47, 48, 49, 50, 56, 57, 58, 59,
+                                        # 67, 68, 69, 70, 78, 79, 89
         ]
         condition, lower_limit, upper_limit = zip(*condition_choices)
         lower_limits = np.select(condition, lower_limit)
         upper_limits = np.select(condition, upper_limit)
+
+        try:
+            assert np.all(upper_limits > lower_limits)
+        except:
+            raise('Sigrid decoding invalid')
 
         # The variable reference is the closet value of data_orig to NIC data, given that the NIC
         # data is an interval. So, the NIC sigrid codes are converted to a reference as follows:
