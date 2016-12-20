@@ -10,6 +10,9 @@ from data_decoders.sig_reader import SIGFileReader
 from data_decoders.sigrid_decoder import DecodeSIGRIDCodes
 
 
+import json
+
+
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,
 #                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
@@ -75,7 +78,9 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     eval_data = np.flipud(dataset.variables['Band1'][:]) #.astype(np.uint8))
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
+    LOG.debug('Decoding shape file with sigrid codes: {}'.format(np.unique(eval_data)))
     eval_data = decoder.sigrid_decoding(eval_data, orig_data)
+
 
     return eval_data
 
@@ -85,6 +90,7 @@ def handle_binfile(bin_file, orig_file, orig_data):
     eval_file_data = bin_reader.read_data(bin_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
+    LOG.debug('Decoding bin file with sigrid codes: {}'.format(np.unique(eval_file_data)))
     eval_data = decoder.decode_values(eval_file_data, orig_data)
     return eval_data
 
@@ -94,6 +100,7 @@ def handle_sigfile(sig_file, orig_file, orig_data):
     eval_file_data = sig_reader.read_data(sig_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
+    LOG.debug('Decoding sig file with sigrid codes: {}'.format(np.unique(eval_file_data)))
     eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
     return eval_data
 
@@ -113,7 +120,11 @@ def handle_osi_ice_conc_nc_file(input_file):
         The 'matrix' of ice concentration values. It is expected for
         this validation that the values are in the range of [0..100]
     """
-    dataset = Dataset(input_file)
+    try:
+        dataset = Dataset(input_file)
+    except IOError:
+        LOG.info('File: {} not found'.format(input_file))
+        raise
     ice_conc = dataset.variables['ice_conc'][0].data[:]
     status_flag = dataset.variables['status_flag'][0][:]
     mask_flags = np.logical_or.reduce((status_flag & 1 == 1, status_flag & 2 == 2, status_flag & 8 == 8))
