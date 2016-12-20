@@ -2,12 +2,14 @@ import numpy as np
 from numpy import ma
 import logging
 
-LOG = logging.getLogger(__name__)
-
 """
-according to https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid
+
+## Codes and Values for Ice Concentrations
+
+See https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid
 
 Ice Concentration from Egg Code 	SIGRID Code 	EASE-Grid Product Value for Concentration
+-------------------------------     -----------     -----------------------------------------
 Ice free 	                            00 	                     0
 Less than 1/10 (open water) 	        01 	                     5
 Bergy water 	                        02  	                 5
@@ -22,65 +24,116 @@ Bergy water 	                        02  	                 5
 9/10 	                                90                   	90
 More than 9/10, less than 10/10 	    91                   	95
 10/10 	                                92                   	100
+
+Undetermined                            99                      255 # Assuming 255 in undetermined,
+                                                                    # but not verified
+
+Concentration Intervals
+(Cl = lowest concentration in interval
+(Ch = highest concentration in interval)	ClCh
+Examples:
+1/10 - 3/10	                            13	                    20
+4/10 - 6/10	                            46	                    50
+7/10 - 9/10	                            79	                    80
+7/10 - 10/10	                        71                  	85 # How does this follow?
+
+Table 9.
+
+EASE-Grid Climatology Data File Values:
+Ice concentration (percent) or frequency of occurrence (percent) (in multiples of 5)
+
+## Description of EASE Grid Format
+https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
+
+## Description of GRIDDED SIGRID FORMAT FOR SEA ICE
+http://www.natice.noaa.gov/products/sigrid.html
+
+The sigrid and sig files appear to sometimes have a mixture of sigrid codes and ice concentration intervals.
+
+***
+The bin files sometimes also contain value 15. I cannot find this code in the documentation,
+so it is not clear what the sigrid code should be.
+***
+
 """
 
+LOG = logging.getLogger(__name__)
+
+
 class DecodeSIGRIDCodes(object):
+
     def decode_values(self, data_eval, product_file_data):
-        try:
-            sigrid_codes = self.bin_intervals_to_sigrid_codes(data_eval)
-            LOG.debug('Converted bin intervals to sigrid codes')
-        except ValueError:
-            sigrid_codes = data_eval
-            LOG.debug('Trying to decode assuming sigrid codes...')
+        data_eval = data_eval.astype(int)
+        self.valid_values_check(data_eval)
+        sigrid_codes = self.intervals_to_sigrid_codes(data_eval)
+        reference = self.sigrid_decoding(sigrid_codes, product_file_data)
+        return reference
 
-        decoded_ice_conc = self.sigrid_decoding(sigrid_codes, product_file_data)
-        return decoded_ice_conc
+    @staticmethod
+    def valid_values_check(data_eval):
+        expected_intervals = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100, 99]
+        expected_sigrid = [0, 1, 2, 13, 24, 35, 46, 57, 68, 79, 81, 91, 92, 255]
+        expected = expected_intervals + expected_sigrid
+        for v in np.unique(data_eval):
+            if (not v in expected) and (not isinstance(v, np.ma.core.MaskedConstant)):
+                if v == 15:
+                    LOG.warning('I do not know what to do with a value of 15')
+                else:
+                    raise ValueError('Unexpected value in file: {0}'.format(v))
 
-    def bin_intervals_to_sigrid_codes(self, data_eval):
+    @staticmethod
+    def intervals_to_sigrid_codes(data_eval):
         """
+        Convert the bin intervals to the corresponding sigrid codes
         For documentation on the bin files:
         https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
         """
+        de = data_eval
+        # condition_choices is [(de == concentration_interval, sigrid_code), ...]
+        condition_choice = [
+            (de == 0,    0),
+            (de == 5,    1),   # TODO: Check this. It can also be 2.
+            (de == 10,   2),   # TODO: Check this.
+            (de == 15,  255),  # TODO: This is wrong! What should it be?
+            (de == 20,  13),
+            (de == 30,  24),
+            (de == 40,  35),
+            (de == 50,  46),
+            (de == 60,  57),
+            (de == 70,  68),
+            (de == 80,  79),
+            (de == 90,  81),
+            (de == 95,  91),
+            (de == 100, 92),
+            (de == 99, 255)
+        ]
+        condition, choice = zip(*condition_choice)
+        codes = np.select(condition, choice, default=de)
 
-        data_eval = data_eval.astype(int)
+        if isinstance(de, np.ma.core.MaskedArray):
+            codes = np.ma.array(codes, mask=de.mask)
 
-        expected_vals = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100]
-        for v in np.unique(data_eval):
-            if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
-                LOG.debug('Not a bin file as contains {0}'.format(v))
-                raise ValueError
-
-        codes = np.zeros(data_eval.shape)
-        codes.fill(np.nan)
-        codes[data_eval == 0] = 0
-        codes[data_eval == 5] = 1
-        codes[data_eval == 10] = 2  # TODO: Check this
-        codes[data_eval == 20] = 13
-        codes[data_eval == 30] = 24
-        codes[data_eval == 40] = 35
-        codes[data_eval == 50] = 46
-        codes[data_eval == 60] = 57
-        codes[data_eval == 70] = 68
-        codes[data_eval == 80] = 79
-        codes[data_eval == 90] = 81
-        codes[data_eval == 95] = 91
-        codes[data_eval == 100] = 92
-        codes = ma.masked_invalid(codes)
         return codes
 
-    def sigrid_decoding(self, data_eval, data_orig):
-        data_eval = data_eval.astype(int)
+    @staticmethod
+    def sigrid_decoding(data_eval, data_orig):
 
-        expected_vals = [0, 1, 2, 13, 24, 35, 46, 57, 68, 79, 81, 91, 92, 99]
+        # Check that there are no unexpected values
+
+        expected_vals = [0, 1, 2, 13, 24, 35, 46, 57, 68, 79, 81, 91, 92, 255]
+        # Sometimes I also get 10, 20
         for v in np.unique(data_eval):
             if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
                 raise ValueError('Skipping this file: value {0} was not expected in sigrid code'.format(v))
 
+        # Convert the sigrid codes to upper and lower limits of ice concentration
+
         de = data_eval
-        condition_choice = np.array([
+        # condition_choices is [(de == sigrid_code, lower_limit, upper_limit), ...]
+        condition_choices = [
             (de == 00,   0,  0),
-            (de == 01,   0, 10),  # TODO: Check this
-            (de == 02,   0, 20),  # TODO: Check this
+            (de == 01,   0, 10),
+            (de == 02,   0, 10),  # TODO: Check this
             (de == 13,  10, 30),
             (de == 24,  20, 40),
             (de == 35,  30, 50),
@@ -91,30 +144,33 @@ class DecodeSIGRIDCodes(object):
             (de == 81,  80, 100),
             (de == 91,  90, 100),
             (de == 92, 100, 100),
-            (de == 99, np.nan, np.nan)
-        ])
-        cond, lower_limit, upper_limit = condition_choice.T
-        lower_limits = np.select(cond, lower_limit)
-        upper_limits = np.select(cond, upper_limit)
+            (de == 255, np.nan, np.nan)
+        ]
+        condition, lower_limit, upper_limit = zip(*condition_choices)
+        lower_limits = np.select(condition, lower_limit)
+        upper_limits = np.select(condition, upper_limit)
 
-        do = data_orig
-        condition = [(do >= lower_limits) & (do <= upper_limits),
-                     do < lower_limits,
-                     do > upper_limits]
-        choice = [do,
-                  lower_limits,
-                  upper_limits]
-        reference = np.select(condition, choice, default=np.nan)
+        # The variable reference is the closet value of data_orig to NIC data, given that the NIC
+        # data is an interval. So, the NIC sigrid codes are converted to a reference as follows:
+        # * if data_orig is within the bounds of the NIC limits, reference = data_orig
+        # * otherwise, reference is equal to the closest limit of the NIC interval
+
+        do, ll, ul = data_orig, lower_limits, upper_limits
+        # condition_choice is a follows: [(interval, choice),...]
+        condition_choice = [((do >= ll) & (do <= ul), do),
+                            (do < ll,                 ll),
+                            (do > ul,                 ul)]
+        cond, choice = zip(*condition_choice)
+        reference = np.select(cond, choice, default=de)
 
         if np.any(np.isnan(reference)):
-            LOG.warning('Not all values decoded: contains NaNs')
+            LOG.info('The file contains undetermined values')
 
         if isinstance(data_eval, np.ma.core.MaskedArray):
             reference = np.ma.array(reference, mask=(data_eval.mask | np.isnan(reference)))
 
         return reference
 
-    #
     # def sigrid_decoding(self, data_eval, data_orig):
     #     """
     #     Decodes a

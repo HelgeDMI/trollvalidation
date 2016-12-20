@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import logging
 import multiprocessing as mp
 from datetime import datetime, date
