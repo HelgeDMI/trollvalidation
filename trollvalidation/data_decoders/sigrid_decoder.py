@@ -25,9 +25,6 @@ Bergy water 	                        02  	                 5
 More than 9/10, less than 10/10 	    91                   	95
 10/10 	                                92                   	100
 
-Undetermined                            99                      255 # Assuming 255 in undetermined,
-                                                                    # but not verified
-
 Concentration Intervals
 (Cl = lowest concentration in interval
 (Ch = highest concentration in interval)	ClCh
@@ -36,8 +33,11 @@ Examples:
 4/10 - 6/10	                            46	                    50
 7/10 - 9/10	                            79	                    80
 7/10 - 10/10	                        71                  	85 # How does this follow?
-
+----------------------------------------------------------------------------------------------------
 Table 9.
+
+Undetermined                            99                      255 # Assuming 255 in undetermined,
+                                                                    # but not verified
 
 EASE-Grid Climatology Data File Values:
 Ice concentration (percent) or frequency of occurrence (percent) (in multiples of 5)
@@ -50,11 +50,6 @@ http://www.natice.noaa.gov/products/sigrid.html
 
 The sigrid and sig files appear to sometimes have a mixture of sigrid codes and ice concentration intervals.
 
-***
-The bin files sometimes also contain value 15. I cannot find this code in the documentation,
-so it is not clear what the sigrid code should be.
-***
-
 """
 
 LOG = logging.getLogger(__name__)
@@ -62,53 +57,24 @@ LOG = logging.getLogger(__name__)
 
 class DecodeSIGRIDCodes(object):
 
-    def decode_values(self, data_eval, product_file_data):
-        data_eval = data_eval.astype(int)
-        self.valid_values_check(data_eval)
-        sigrid_codes = self.intervals_to_sigrid_codes(data_eval)
-        reference = self.sigrid_decoding(sigrid_codes, product_file_data)
-        return reference
-
     @staticmethod
-    def valid_values_check(data_eval):
-        expected_intervals = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100, 99]
-        expected_sigrid = [0, 1, 2, 13, 24, 35, 46, 57, 68, 79, 81, 91, 92, 255]
-        expected = expected_intervals + expected_sigrid
+    def valid_values_check(data_eval, expected):
         for v in np.unique(data_eval):
             if (not v in expected) and (not isinstance(v, np.ma.core.MaskedConstant)):
-                if v == 15:
-                    LOG.warning('I do not know what to do with a value of 15')
-                else:
                     raise ValueError('Unexpected value in file: {0}'.format(v))
 
-    @staticmethod
-    def intervals_to_sigrid_codes(data_eval):
+    def intervals_to_sigrid_codes(self, data_eval):
         """
         Convert the bin intervals to the corresponding sigrid codes
         For documentation on the bin files:
         https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
         """
+        expected = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100, 99]
+        self.valid_values_check(data_eval, expected)
         de = data_eval
         # condition_choices is [(de == concentration_interval, sigrid_code), ...]
-        # condition_choice = [
-        #     (de == 0,    0),
-        #     (de == 5,    1),   # TODO: Check this. It can also be 2.
-        #     (de == 10,   2),   # TODO: Check this.
-        #     (de == 15,  255),  # TODO: This is wrong! What should it be?
-        #     (de == 20,  13),
-        #     (de == 30,  24),
-        #     (de == 40,  35),
-        #     (de == 50,  46),
-        #     (de == 60,  57),
-        #     (de == 70,  68),
-        #     (de == 80,  79),
-        #     (de == 90,  81),
-        #     (de == 95,  91),
-        #     (de == 100, 92),
-        #     (de == 99, 255)
-        # ]
         condition_choice = [
-            (de == 05,  01),   # TODO: Check this. It can also be 2.
+            (de == 05,  01),  # TODO: Check this. It can also be 2.
             (de == 95,  91),
             (de == 100, 92),
             (de == 99, 255)
@@ -121,34 +87,31 @@ class DecodeSIGRIDCodes(object):
 
         return codes
 
-    @staticmethod
-    def sigrid_decoding(data_eval, data_orig):
+    def sigrid_decoding(self, data_eval, data_orig):
+        data_eval = data_eval.astype(int)
 
         # Check that there are no unexpected values
 
-        expected_vals = [00, 01, 02, 10, 12, 13, 14, 15, 16, 17, 18, 19, 20, 23, 24, 25,
-                         26, 27, 28, 29, 30, 34, 35, 36, 37, 38, 39, 40, 45, 46, 47, 48,
-                         49, 50, 56, 57, 58, 59, 60, 67, 68, 69, 70, 78, 79, 80, 89, 90,
-                         91, 92, 255]
-        # Sometimes I also get 10, 20
-        for v in np.unique(data_eval):
-            if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
-                raise ValueError('Skipping this file: value {0} was not expected in sigrid code'.format(v))
+        expected = [00, 01, 02, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27,
+                         28, 29, 30, 31, 34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49,
+                         50, 51, 56, 57, 58, 59, 60, 61, 67, 68, 69, 70, 71, 78, 79, 80, 81,
+                         89, 90, 91, 92, 255]
+        self.valid_values_check(data_eval, expected)
 
         # Convert the sigrid codes to upper and lower limits of ice concentration
 
         de = data_eval
-        lc = 10 * (de // 10)  # lower code: 1st digit * 10
-        uc = 10 * (de % 10)   # upper code: 2nd digit * 10
+        cl = 10 * (de // 10)  # lower code: 1st digit * 10
+        cu = 10 * (de % 10)   # upper code: 2nd digit * 10
         condition_choices = [
             (de == 255, np.nan, np.nan),
             (de == 00, 0,  0),
             (de == 01, 0, 10),
             (de == 02, 0, 10),  # TODO: Check this
             (de == 92, 100, 100),
-            (uc == 10, lc, 100),        # 21, 31, 41, 51, 61, 71, 81, 91
-            (uc == 00, de, de),         # 10, 20, 30, 40, 50, 60, 70, 80, 90
-            (~(de % 10 == 0), lc, uc)   # 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25,
+            (cu == 10, cl, 100),        # 21, 31, 41, 51, 61, 71, 81, 91
+            (cu == 00, de, de),         # 10, 20, 30, 40, 50, 60, 70, 80, 90
+            (~(de % 10 == 0), cl, cu)   # 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25,
                                         # 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45,
                                         # 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69,
                                         # 78, 79, 89
@@ -158,9 +121,10 @@ class DecodeSIGRIDCodes(object):
         upper_limits = np.select(condition, upper_limit)
 
         try:
-            assert np.all(upper_limits > lower_limits)
+            assert np.all((upper_limits >= lower_limits) | np.isnan(upper_limits) | np.isnan(lower_limits))
         except:
-            raise('Sigrid decoding invalid')
+            u, l = upper_limit[upper_limits < lower_limits], lower_limits[upper_limits < lower_limits]
+            raise ValueError('Sigrid decoding invalid: upper {0} < lower {1}'.format(u, l))
 
         # The variable reference is the closet value of data_orig to NIC data, given that the NIC
         # data is an interval. So, the NIC sigrid codes are converted to a reference as follows:
@@ -181,6 +145,12 @@ class DecodeSIGRIDCodes(object):
         if isinstance(data_eval, np.ma.core.MaskedArray):
             reference = np.ma.array(reference, mask=(data_eval.mask | np.isnan(reference)))
 
+        return reference
+
+    def intervals_decoding(self, data_eval, product_file_data):
+        data_eval = data_eval.astype(int)
+        sigrid_codes = self.intervals_to_sigrid_codes(data_eval)
+        reference = self.sigrid_decoding(sigrid_codes, product_file_data)
         return reference
 
     # def sigrid_decoding(self, data_eval, data_orig):

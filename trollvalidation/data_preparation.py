@@ -83,7 +83,7 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding shape file with values: {}'.format(np.unique(eval_data)))
-    eval_data = decoder.decode_values(eval_data, orig_data)
+    eval_data = decoder.sigrid_decoding(eval_data, orig_data)
 
     return eval_data
 
@@ -99,7 +99,7 @@ def handle_binfile(bin_file, orig_file, orig_data):
 
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data)))
-    eval_data = decoder.decode_values(eval_file_data, orig_data)
+    eval_data = decoder.intervals_decoding(eval_file_data, orig_data)
     return eval_data
 
 
@@ -114,7 +114,7 @@ def handle_sigfile(sig_file, orig_file, orig_data):
 
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding sig file with values: {}'.format(np.unique(eval_file_data)))
-    eval_data = decoder.decode_values(eval_file_data, orig_data)
+    eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
     return eval_data
 
 
