@@ -48,8 +48,6 @@ https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
 ## Description of GRIDDED SIGRID FORMAT FOR SEA ICE
 http://www.natice.noaa.gov/products/sigrid.html
 
-The sigrid and sig files appear to sometimes have a mixture of sigrid codes and ice concentration intervals.
-
 """
 
 LOG = logging.getLogger(__name__)
@@ -143,7 +141,7 @@ class DecodeSIGRIDCodes(object):
             LOG.info('The file contains undetermined values')
 
         if isinstance(data_eval, np.ma.core.MaskedArray):
-            reference = np.ma.array(reference, mask=(data_eval.mask | np.isnan(reference)))
+            reference = ma.array(reference, mask=(data_eval.mask | np.isnan(reference)))
 
         return reference
 
