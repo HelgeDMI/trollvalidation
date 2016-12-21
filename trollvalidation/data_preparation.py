@@ -99,7 +99,7 @@ def handle_binfile(bin_file, orig_file, orig_data):
 
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data)))
-    eval_data = decoder.intervals_decoding(eval_file_data, orig_data)
+    eval_data = decoder.easegrid_decoding(eval_file_data, orig_data)
     return eval_data
 
 

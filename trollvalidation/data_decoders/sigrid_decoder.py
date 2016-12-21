@@ -90,10 +90,10 @@ class DecodeSIGRIDCodes(object):
 
         # Check that there are no unexpected values
 
-        expected = [00, 01, 02, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25, 26, 27,
-                         28, 29, 30, 31, 34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48, 49,
-                         50, 51, 56, 57, 58, 59, 60, 61, 67, 68, 69, 70, 71, 78, 79, 80, 81,
-                         89, 90, 91, 92, 255]
+        expected = [00, 01, 02, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 23, 24, 25,
+                    26, 27, 28, 29, 30, 31, 34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48,
+                    49, 50, 51, 56, 57, 58, 59, 60, 61, 67, 68, 69, 70, 71, 78, 79, 80, 81,
+                    89, 90, 91, 92, 255]
         self.valid_values_check(data_eval, expected)
 
         # Convert the sigrid codes to upper and lower limits of ice concentration
@@ -115,22 +115,26 @@ class DecodeSIGRIDCodes(object):
                                         # 78, 79, 89
         ]
         condition, lower_limit, upper_limit = zip(*condition_choices)
-        lower_limits = np.select(condition, lower_limit)
-        upper_limits = np.select(condition, upper_limit)
+        lower_limits = np.select(condition, lower_limit, default=-128)
+        upper_limits = np.select(condition, upper_limit, default=-128)
+
+        if (-128 in lower_limits) or (-128 in upper_limits):
+            raise ValueError('Values {} not decoded'.format(de[(lower_limits == -128) | (upper_limits == -128)]))
 
         try:
-            assert np.all((upper_limits >= lower_limits) | np.isnan(upper_limits) | np.isnan(lower_limits))
+            assert np.any((upper_limits >= lower_limits) | np.isnan(upper_limits) | np.isnan(lower_limits))
         except:
             u, l = upper_limit[upper_limits < lower_limits], lower_limits[upper_limits < lower_limits]
-            raise ValueError('Sigrid decoding invalid: upper {0} < lower {1}'.format(u, l))
+            raise ValueError('Sigrid decoding invalid: {0} (upper) < {1} (lower)'.format(u, l))
 
-        # The variable reference is the closet value of data_orig to NIC data, given that the NIC
-        # data is an interval. So, the NIC sigrid codes are converted to a reference as follows:
-        # * if data_orig is within the bounds of the NIC limits, reference = data_orig
-        # * otherwise, reference is equal to the closest limit of the NIC interval
+        # The variable 'reference' is the closet possible value of the NIC data to data_orig, given that the NIC data
+        # can be an interval. So, if the NIC sigrid codes specify limit, they converted to a reference as follows:
+        #   * if data_orig is within the bounds of the NIC limits, reference = data_orig
+        #   * otherwise, reference is equal to the closest limit of the NIC interval.
+        # If the NIC codes are specific values, rather that limits, 'reference' is equal to data_eval
 
         do, ll, ul = data_orig, lower_limits, upper_limits
-        # condition_choice is a follows: [(interval, choice),...]
+        # 'condition_choice' is a follows: [(interval, choice),...]
         condition_choice = [((do >= ll) & (do <= ul), do),
                             (do < ll,                 ll),
                             (do > ul,                 ul)]
@@ -145,7 +149,7 @@ class DecodeSIGRIDCodes(object):
 
         return reference
 
-    def intervals_decoding(self, data_eval, product_file_data):
+    def easegrid_decoding(self, data_eval, product_file_data):
         data_eval = data_eval.astype(int)
         sigrid_codes = self.intervals_to_sigrid_codes(data_eval)
         reference = self.sigrid_decoding(sigrid_codes, product_file_data)
