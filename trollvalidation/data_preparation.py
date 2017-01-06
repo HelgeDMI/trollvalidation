@@ -82,38 +82,30 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     eval_data = np.flipud(dataset.variables['Band1'][:]) #.astype(np.uint8))
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding shape file with values: {}'.format(np.unique(eval_data)))
+    LOG.info('Decoding shape file with values: {}'.format(np.unique(eval_data, return_counts=True)))
     eval_data = decoder.sigrid_decoding(eval_data, orig_data)
 
     return eval_data
 
 
 def handle_binfile(bin_file, orig_file, orig_data):
-    """
-    Only intervals: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100, 99]
-    are expected
-    """
 
     bin_reader = BINFileReader()
     eval_file_data = bin_reader.read_data(bin_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data)))
+    LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data, return_counts=True)))
     eval_data = decoder.easegrid_decoding(eval_file_data, orig_data)
     return eval_data
 
 
 def handle_sigfile(sig_file, orig_file, orig_data):
-    """
-    A mixture of sigrid codes: [0, 1, 2, 13, 24, 35, 46, 57, 68, 79, 81, 91, 92, 255]
-    and intervals: [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100, 99]
-    are expected
-    """
+
     sig_reader = SIGFileReader()
     eval_file_data = sig_reader.read_data(sig_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding sig file with values: {}'.format(np.unique(eval_file_data)))
+    LOG.info('Decoding sig file with values: {}'.format(np.unique(eval_file_data, return_counts=True)))
     eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
     return eval_data
 

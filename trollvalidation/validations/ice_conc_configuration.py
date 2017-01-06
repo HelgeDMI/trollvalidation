@@ -49,14 +49,15 @@ METNO_DOWNL = {
 # }
 
 
-NIC_BIN_DOWNL = {
-    'protocol': 'ftp://',
-    'host': 'sidads.colorado.edu',
-    'remote_dir_f_pattern':
-        'pub/DATASETS/NOAA/G02172/weekly/nic_weekly_*_tot.v0.bin',
-    'remote_date_pattern': (r'\d{4}_\d{2}_\d{2}', '%Y_%m_%d'),
-    'glob_file': os.path.join(TMP_DIR, 'nic_bin_files.json')
-}
+# NIC_BIN_DOWNL = {
+#     'protocol': 'ftp://',
+#     'host': 'sidads.colorado.edu',
+#     'remote_dir_f_pattern':
+#         'pub/DATASETS/NOAA/G02172/weekly/nic_weekly_*_tot.v0.bin',
+#     'remote_date_pattern': (r'\d{4}_\d{2}_\d{2}', '%Y_%m_%d'),
+#     'glob_file': os.path.join(TMP_DIR, 'nic_bin_files.json')
+# }
+
 
 NIC_SIG_DOWNL = {
     'protocol': 'http://',

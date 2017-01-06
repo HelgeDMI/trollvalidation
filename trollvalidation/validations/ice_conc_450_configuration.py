@@ -2,6 +2,7 @@ import os
 import datetime
 import pandas as pd
 
+
 # for OSI-450 validation
 YEARS_OF_INTEREST = range(1979, 2016)
 # for OSI-401 validation
@@ -16,7 +17,8 @@ END_YEAR = max(YEARS_OF_INTEREST)
 if END_YEAR == START_YEAR:
     END_YEAR += 1
 
-BASE_PATH = os.path.join(os.path.expanduser('~/'), 'validation', 'data')
+# BASE_PATH = os.path.join(os.path.expanduser('~/'), 'validation', 'data')
+BASE_PATH = os.path.join('/data/jol/validation/20170102/', 'validation', 'data')
 INPUT_DIR = os.path.join(BASE_PATH, 'input')
 # for OSI-409 validation
 OUTPUT_DIR = os.path.join(BASE_PATH, 'output')
@@ -49,11 +51,20 @@ METNO_DOWNL = {
 # }
 
 
+# NIC_BIN_DOWNL = {
+#     'protocol': 'ftp://',
+#     'host': 'sidads.colorado.edu',
+#     'remote_dir_f_pattern':
+#         'pub/DATASETS/NOAA/G02172/weekly/nic_weekly_*_tot.v0.bin',
+#     'remote_date_pattern': (r'\d{4}_\d{2}_\d{2}', '%Y_%m_%d'),
+#     'glob_file': os.path.join(TMP_DIR, 'nic_bin_files.json')
+# }
+
 NIC_BIN_DOWNL = {
     'protocol': 'ftp://',
-    'host': 'sidads.colorado.edu',
+    'host': 'ftp.dmi.dk',
     'remote_dir_f_pattern':
-        'pub/DATASETS/NOAA/G02172/weekly/nic_weekly_*_tot.v0.bin',
+        '/sat/noaa-icecharts/pub/DATASETS/NOAA/G02172/weekly/nic_weekly_*_tot.v0.bin',
     'remote_date_pattern': (r'\d{4}_\d{2}_\d{2}', '%Y_%m_%d'),
     'glob_file': os.path.join(TMP_DIR, 'nic_bin_files.json')
 }
@@ -127,3 +138,5 @@ else:
     if not cache['lftp'].is_installed:
         raise Exception('You have to have "lftp" installed. Do "apt-get '
                         'install lftp"!')
+
+

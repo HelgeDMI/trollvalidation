@@ -48,6 +48,15 @@ https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
 ## Description of GRIDDED SIGRID FORMAT FOR SEA ICE
 http://www.natice.noaa.gov/products/sigrid.html
 
+Accuracy and Precision
+The accuracy and precision of the original charts is not known with certainty. Partington (2003)
+cites +/-5 percent to +/-10 percent as the accuracy of ice concentration estimates. Total ice
+concentration for an individual polygon is recorded in a range. That range is expressed in
+tenths. The mean value of that range is used in the EASE-Grid files. Thus, the precision can
+vary from grid cell to grid cell depending on the range with which the concentration was
+originally charted.
+
+
 """
 
 LOG = logging.getLogger(__name__)
@@ -72,10 +81,13 @@ class DecodeSIGRIDCodes(object):
         de = data_eval
         # condition_choices is [(de == concentration_interval, sigrid_code), ...]
         condition_choice = [
+            (de == 99, 255),
             (de == 05,  01),  # TODO: Check this. It can also be 2.
             (de == 95,  91),
             (de == 100, 92),
-            (de == 99, 255)
+            (de == 00,  00),
+            ((de % 10 == 0), de - 10, de + 10)
+
         ]
         condition, choice = zip(*condition_choice)
         codes = np.select(condition, choice, default=de)

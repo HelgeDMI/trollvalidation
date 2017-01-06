@@ -139,7 +139,6 @@ def collect_pickled_data():
     hdf5.close()
 
 
-
 def val_step_star(input_tuple):
     return ice_conc_val_step(*input_tuple)
 

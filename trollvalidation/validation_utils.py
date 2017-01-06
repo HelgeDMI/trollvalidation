@@ -38,15 +38,16 @@ class TmpFiles(object):
 
 
 def cleanup(_, tmp_files):
-    # Delete files first and the remove directories
-    for tmp_file in tmp_files:
-        if os.path.isfile(tmp_file):
-            LOG.info("Cleaning up... {0}".format(tmp_file))
-            os.remove(tmp_file)
-    for tmp_folder in tmp_files:
-        if os.path.exists(tmp_folder):
-            LOG.info("Cleaning up... {0}".format(tmp_folder))
-            shutil.rmtree(tmp_folder)
+    pass
+    # # Delete files first and the remove directories
+    # for tmp_file in tmp_files:
+    #     if os.path.isfile(tmp_file):
+    #         LOG.info("Cleaning up... {0}".format(tmp_file))
+    #         os.remove(tmp_file)
+    # for tmp_folder in tmp_files:
+    #     if os.path.exists(tmp_folder):
+    #         LOG.info("Cleaning up... {0}".format(tmp_folder))
+    #         shutil.rmtree(tmp_folder)
 
 
 def write_to_csv(results, description_str=''):
@@ -61,6 +62,7 @@ def write_to_csv(results, description_str=''):
             df = pd.DataFrame(results, index=zip(*results)[0])
         df.to_csv(os.path.join(cfg.OUTPUT_DIR, '{0}_results.csv'.format(
             description_str)))
+
 
 def get_area_def(file_handle):
     """

@@ -25,7 +25,7 @@ def total_std_dev(data_eval, data_orig):
 
 
 def ice_bias(data_eval, data_orig):
-    only_ice_in_chart = np.ma.array(data_eval, mask=data_eval == 0)
+    only_ice_in_chart = np.ma.array(data_eval, mask=(data_eval == 0 | data_eval.mask))
     diff = data_orig - only_ice_in_chart
     return diff.mean()
 

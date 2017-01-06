@@ -124,7 +124,10 @@ def collect_pickled_data():
     def stack_data(file_list):
         dates_n_data = map(read_pkl, file_list)
         dates, datas = zip(*dates_n_data)
-        masks = np.dstack((d.mask for d in datas))
+        try:
+            masks = np.dstack((d.mask for d in datas))
+        except AttributeError:
+            masks = np.dstack((np.zeros(d.shape) for d in datas))
         datas = np.dstack(datas)
         datas = ma.array(datas, mask=masks, fill_value=np.nan)
         return dates, datas
@@ -177,13 +180,13 @@ def ice_conc_val_task(file_pairs, description='', description_str=''):
 
 
 if __name__ == '__main__':
-    desc = config.DESCRIPTION.format('northern')
-    desc_str = config.SHORT_DESCRIPTION.format('NH', date.today())
-    ice_conc_val_task(description=desc, description_str=desc_str)
-
-    desc = config.DESCRIPTION.format('southern')
-    desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
-    ice_conc_val_task(description=desc, description_str=desc_str)
+    # desc = config.DESCRIPTION.format('northern')
+    # desc_str = config.SHORT_DESCRIPTION.format('NH', date.today())
+    # ice_conc_val_task(description=desc, description_str=desc_str)
+    #
+    # desc = config.DESCRIPTION.format('southern')
+    # desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
+    # ice_conc_val_task(description=desc, description_str=desc_str)
 
     if 'PICKLED_DATA' in cfg.__dict__.keys():
         collect_pickled_data()
