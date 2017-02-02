@@ -5,10 +5,10 @@ import os
 import re
 from collections import OrderedDict
 
-from data_collectors import downloader
+from trollvalidation.data_collectors import downloader
 from dateutil import parser
 
-from trollvalidation.validations import configuration as cfg
+import configuration as cfg
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,
@@ -30,7 +30,6 @@ def extract_timestamp(from_string, with_r_pattern, with_date_pattern):
 
 
 def generate_osi450_product_timeseries(files):
-
     timeseries = OrderedDict()
     hemispheres = ['nh', 'sh']
 

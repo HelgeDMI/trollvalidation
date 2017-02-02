@@ -5,17 +5,45 @@ import shutil
 import uuid
 from PIL import Image
 from zipfile import ZipFile
+import argparse
+import json
 
 import pandas as pd
 import numpy as np
 import pyresample as pr
-
-from trollvalidation.validations import configuration as cfg
+import configuration as cfg
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,
 #                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
 #                     datefmt='%Y-%m-%d %H:%M:%S')
+
+
+def arg_parser():
+    parser = argparse.ArgumentParser(description='Validation runner')
+    parser.add_argument('input_directory', metavar='input_dir', type=str, nargs='?')
+    parser.add_argument('output_directory', metavar='output_dir', type=str, nargs='?')
+    args = parser.parse_args()
+    return args
+
+
+def setup_directories(input_directory, output_directory):
+    if not os.path.exists(input_directory):
+        os.system('mkdir -p {0}'.format(input_directory))
+    if not os.path.exists(output_directory):
+        os.system('mkdir -p {0}'.format(output_directory))
+        os.system('mkdir -p {0}'.format(cfg.TMP_DIR))
+
+    for direct in [cfg.INPUT_DIR, cfg.OUTPUT_DIR]:
+        try:
+            os.unlink(direct)
+        except OSError:
+            shutil.rmtree(direct)
+        else:
+            pass
+
+    os.symlink(input_directory, cfg.INPUT_DIR)
+    os.symlink(output_directory, cfg.OUTPUT_DIR)
 
 
 class TmpFiles(object):
@@ -151,7 +179,7 @@ def uncompress(compressed_file, target=cfg.TMP_DIR):
         return compressed_file, []
 
 
-def dump_data(ref_time, eval_data, orig_data, orig_file):
+def dump_data(ref_time, eval_data, orig_data, eval_file, orig_file):
     hemisphere = 'NH'
     if '_sh_' in os.path.basename(orig_file) or \
         '_SH_' in os.path.basename(orig_file):
@@ -168,6 +196,10 @@ def dump_data(ref_time, eval_data, orig_data, orig_file):
         cfg.VALIDATION_ID, hemisphere))
     eval_data_img.save(fname)
     eval_data.dump(fname.replace('.bmp', '.pkl'))
+
+    filenames = {'satellite_file': orig_file, 'reference_file': eval_file}
+    with open(fname.replace('.bmp', '.json'), 'w') as fp:
+        json.dump(filenames, fp)
 
     orig_data_img = Image.fromarray(orig_data.astype(np.uint8))
     fname = os.path.join(out_path, '{0}_{1}_orig_data.bmp'.format(

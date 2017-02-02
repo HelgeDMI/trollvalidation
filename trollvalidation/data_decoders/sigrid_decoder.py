@@ -76,19 +76,18 @@ class DecodeSIGRIDCodes(object):
         For documentation on the bin files:
         https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
         """
-        expected = [0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 100, 99]
+        expected = np.append(np.arange(0, 101, 5), 5)
         self.valid_values_check(data_eval, expected)
         de = data_eval
         # condition_choices is [(de == concentration_interval, sigrid_code), ...]
         condition_choice = [
             (de == 99, 255),
-            (de == 05,  01),  # TODO: Check this. It can also be 2.
+            (de == 05,  01),  # It can also be 2.
             (de == 95,  91),
             (de == 100, 92),
             (de == 00,  00),
             ((de % 10 == 0), de - 10, de + 10)
-
-        ]
+            ]
         condition, choice = zip(*condition_choice)
         codes = np.select(condition, choice, default=de)
 

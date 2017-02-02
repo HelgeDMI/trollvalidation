@@ -25,7 +25,7 @@ def total_std_dev(data_eval, data_orig):
 
 
 def ice_bias(data_eval, data_orig):
-    only_ice_in_chart = np.ma.array(data_eval, mask=(data_eval == 0 | data_eval.mask))
+    only_ice_in_chart = np.ma.array(data_eval, mask=data_eval == 0)
     diff = data_orig - only_ice_in_chart
     return diff.mean()
 
@@ -93,14 +93,14 @@ def ice_std_dev_for_high_in_eval(data_eval, data_orig):
     return diff.std()
 
 
-def water_bias(data_eval, data_orig):
+def water_bias_for_low_in_eval(data_eval, data_orig):
     mask_expr = ~((data_eval >= 0) * (data_eval < 10))
     only_water_in_chart = np.ma.array(data_eval, mask=mask_expr)
     diff = data_orig - only_water_in_chart
     return diff.mean()
 
 
-def water_std_dev(data_eval, data_orig):
+def water_std_dev_for_low_in_eval(data_eval, data_orig):
     mask_expr = ~((data_eval >= 0) * (data_eval < 10))
     only_water_in_chart = np.ma.array(data_eval, mask=mask_expr)
     diff = data_orig - only_water_in_chart

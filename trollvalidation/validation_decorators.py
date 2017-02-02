@@ -62,6 +62,7 @@ def around_step(pre_func=None, post_func=None):
 
                 return results
             except Exception, e:
+                LOG.debug('Error with around_step decorator')
                 LOG.exception(e)
 
         return wrapper

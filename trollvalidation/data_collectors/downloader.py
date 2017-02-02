@@ -8,8 +8,7 @@ import sys
 import urllib2
 from subprocess import Popen, PIPE
 from urllib2 import urlopen
-
-from trollvalidation.validations import configuration as cfg
+import configuration as cfg
 
 LOG = logging.getLogger('nic_downloader')
 
@@ -150,7 +149,6 @@ def glob_file(cfg):
                                             cfg['generate'])
         elif cfg['scrape']:
             remote_files = scrape_all(cfg)
-
 
         # attach protocol and host
         remote_files = ['{0}{1}/{2}'.format(cfg['protocol'], cfg[

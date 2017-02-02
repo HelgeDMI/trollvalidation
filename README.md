@@ -73,7 +73,7 @@ Usage
 ```bash
 cd /path/to/trollvalidation/trollvalidation/
 workon validation
-python ./valdations/your_validation.py
+python ./valdations/your_validation.py [ice_chart_directory results_directory]
 ```
 
 

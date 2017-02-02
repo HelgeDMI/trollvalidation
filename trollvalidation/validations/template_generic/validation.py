@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import sys
+import os
 import logging
 import random
 import string
@@ -14,6 +16,8 @@ from trollvalidation.validation_utils import TmpFiles
 from trollvalidation.validation_decorators import timethis, around_step, \
     around_task, PreReturn
 import configuration as cfg
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,
@@ -37,6 +41,7 @@ def generate_time_series():
     # evaluation files in the second column, and a url to the original files
     # in the third column
     return zip(times_str, eval_paths, orig_paths)
+
 
 def pre_func(ref_time, eval_file, orig_file):
     temp_files = TmpFiles()

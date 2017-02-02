@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 from netCDF4 import Dataset
+import json
 
 import validation_utils
 from data_decoders.bin_reader import BINFileReader
@@ -10,13 +11,11 @@ from data_decoders.sig_reader import SIGFileReader
 from data_decoders.sigrid_decoder import DecodeSIGRIDCodes
 
 
-import json
-
 
 LOG = logging.getLogger(__name__)
-# logging.basicConfig(level=logging.DEBUG,
-#                     format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
-#                     datefmt='%Y-%m-%d %H:%M:%S')
+logging.basicConfig(level=logging.DEBUG,
+                    format='[%(levelname)s: %(asctime)s: %(name)s] %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
@@ -82,7 +81,7 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     eval_data = np.flipud(dataset.variables['Band1'][:]) #.astype(np.uint8))
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding shape file with values: {}'.format(np.unique(eval_data, return_counts=True)))
+    LOG.info('Decoding shape file with values: {}'.format(np.unique(eval_data, return_counts=False)))
     eval_data = decoder.sigrid_decoding(eval_data, orig_data)
 
     return eval_data
@@ -94,7 +93,7 @@ def handle_binfile(bin_file, orig_file, orig_data):
     eval_file_data = bin_reader.read_data(bin_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data, return_counts=True)))
+    LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data, return_counts=False)))
     eval_data = decoder.easegrid_decoding(eval_file_data, orig_data)
     return eval_data
 
@@ -105,10 +104,36 @@ def handle_sigfile(sig_file, orig_file, orig_data):
     eval_file_data = sig_reader.read_data(sig_file, orig_file)
 
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding sig file with values: {}'.format(np.unique(eval_file_data, return_counts=True)))
+    LOG.info('Decoding sig file with values: {}'.format(np.unique(eval_file_data, return_counts=False)))
     eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
     return eval_data
 
+
+# def handle_osi_ice_conc_nc_file(input_file):
+#     """
+#     This function reads the variable 'ice_conc' from an ice
+#     concentration product in NetCDF format.
+#
+#     It filters out all values, which are, based on the field
+#     'status_flag', not a proper ice concentration value.
+#
+#     :param input_file: str
+#         Path to an ice concentration product in NetCDF product.
+#
+#     :return: np.array|np.ma.array
+#         The 'matrix' of ice concentration values. It is expected for
+#         this validation that the values are in the range of [0..100]
+#     """
+#     try:
+#         dataset = Dataset(input_file)
+#     except IOError, e:
+#         LOG.info('File: {} not found'.format(input_file))
+#         LOG.exception(e)
+#     ice_conc = dataset.variables['ice_conc'][0].data[:]
+#     status_flag = dataset.variables['status_flag'][0][:]
+#     mask_conc = np.logical_or(ice_conc < 0, ice_conc > 100)
+#     ice_conc = np.ma.array(ice_conc, mask=mask_flags)
+#     return ice_conc
 
 def handle_osi_ice_conc_nc_file(input_file):
     """
@@ -132,7 +157,38 @@ def handle_osi_ice_conc_nc_file(input_file):
         raise
     ice_conc = dataset.variables['ice_conc'][0].data[:]
     status_flag = dataset.variables['status_flag'][0][:]
-    mask_flags = np.logical_or.reduce((status_flag & 1 == 1, status_flag & 2 == 2, status_flag & 8 == 8))
-    mask_conc = np.logical_or(ice_conc < 0, ice_conc > 100)
-    ice_conc = np.ma.array(ice_conc, mask=(mask_flags | mask_conc))
+    ice_conc = np.ma.array(ice_conc, mask=(status_flag != 0))
+    ice_conc = np.ma.masked_outside(ice_conc, -0.01, 100.01)
+    return ice_conc
+
+
+def handle_osi_ice_conc_nc_file_osi450(input_file, draft):
+    """
+    This function reads the variable 'ice_conc' from an ice
+    concentration product in NetCDF format.
+
+    It filters out all values, which are, based on the field
+    'status_flag', not a proper ice concentration value.
+
+    :param input_file: str
+        Path to an ice concentration product in NetCDF product.
+
+    :return: np.array|np.ma.array
+        The 'matrix' of ice concentration values. It is expected for
+        this validation that the values are in the range of [0..100]
+    """
+    try:
+        dataset = Dataset(input_file)
+    except IOError:
+        LOG.info('File: {} not found'.format(input_file))
+        raise
+    ice_conc = dataset.variables['ice_conc'][0].data[:]
+    status_flag = dataset.variables['status_flag'][0][:]
+    if draft == 'C':
+        mask_flags = np.logical_or.reduce((status_flag & 1 == 1, status_flag & 2 == 2, status_flag & 8 == 8))
+    elif draft == 'E':
+        mask_flags = np.logical_or.reduce(
+            (status_flag & 32 == 32, status_flag & 64 == 64, status_flag & 128 == 128, status_flag & 2 == 2))
+    ice_conc = np.ma.array(ice_conc, mask=mask_flags)
+    ice_conc = np.ma.masked_outside(ice_conc, -0.01, 100.01)
     return ice_conc
