@@ -1,7 +1,7 @@
 """
 The configuration common to all the OSI validations is set here.
 
-Set the following in the submodule that imports this one (example values are given):
+Set the following in the sub-module that imports this one (example values are given):
 
 # YEARS_OF_INTEREST = range(1972, 2017)
 YEARS_OF_INTEREST = [2006]
@@ -31,6 +31,8 @@ import os
 import datetime
 import pandas as pd
 
+# YEARS_OF_INTEREST = range(1972, 2017)
+YEARS_OF_INTEREST = [2006, ]
 
 CSV_HEADER = ['reference_time', 'run_time', 'intermediate_bias', 'ice_bias',
               'water_bias', 'intermediate_stddev', 'ice_stddev', 'water_stddev',
@@ -40,6 +42,11 @@ BASE_PATH = '/tmp'
 INPUT_DIR = os.path.join(BASE_PATH, 'ice_chart_data')
 TMP_DIR = os.path.join(BASE_PATH, 'ice_chart_data', 'tmp')
 OUTPUT_DIR = os.path.join(BASE_PATH, 'ice_chart_output')
+
+START_YEAR = min(YEARS_OF_INTEREST)
+END_YEAR = max(YEARS_OF_INTEREST)
+if END_YEAR == START_YEAR:
+    END_YEAR += 1
 
 AREAS = 'etc/areas.cfg'
 DESCRIPTION = 'Comparison of NIC ice charts and OSI-450 products for {0}' \
@@ -116,6 +123,18 @@ NIC_SHP_DOWNL = {
     },
     'remote_date_pattern': (r'\d{6}', '%y%m%d'),
     'glob_file': os.path.join(TMP_DIR, 'nic_shp_files.json')
+}
+
+# http://thredds.met.no/thredds/dodsC/osisaf/met.no/ice/conc/2016/09/ice_conc_sh_polstere-100_multi_201609211200.nc
+METNO_THREDDS_DOWNL = {
+    'generate':
+        pd.date_range('1/1/{0} 12:00'.format(START_YEAR),
+                      '1/1/{0} 12:00'.format(END_YEAR), freq='D'),
+    'protocol': 'http://',
+    'host': 'thredds.met.no',
+    'remote_dir_f_pattern': None,
+    'remote_date_pattern': (r'\d{12}', '%Y%m%d%H%M'),
+    'glob_file': os.path.join(TMP_DIR, 'metno_thredds_files.json')
 }
 
 

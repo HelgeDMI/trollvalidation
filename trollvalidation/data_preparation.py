@@ -18,7 +18,7 @@ logging.basicConfig(level=logging.DEBUG,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
-def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
+def handle_shapefile(shp_file, test_file, test_data, temp_files):
     """
     This function reprojects, rasterizes, and decodes NIC ice charts
     in shapefile format.
@@ -28,12 +28,12 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     are expected
 
     :param shp_file:
-    :param orig_file:
+    :param test_file:
     :return:
     """
 
     # reproject shapefile:
-    target_area_def = validation_utils.get_area_def(orig_file)
+    target_area_def = validation_utils.get_area_def(test_file)
     proj_string = target_area_def.proj4_string
 
     reproj_filename = 'RE_{0}'.format(os.path.basename(shp_file))
@@ -78,35 +78,35 @@ def handle_shapefile(shp_file, orig_file, orig_data, temp_files):
     dataset = Dataset(netcdf_file)
     # on my computer the image needs to be flipped upside down...
     # TODO: check if this is also necessary on other computers
-    eval_data = np.flipud(dataset.variables['Band1'][:]) #.astype(np.uint8))
+    ref_data = np.flipud(dataset.variables['Band1'][:]) #.astype(np.uint8))
     # finally convert the sigrid ice codes to ice concentrations in %
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding shape file with values: {}'.format(np.unique(eval_data, return_counts=False)))
-    eval_data = decoder.sigrid_decoding(eval_data, orig_data)
+    LOG.info('Decoding shape file with values: {}'.format(np.unique(ref_data, return_counts=False)))
+    ref_data, low_lim, upp_lim = decoder.sigrid_decoding(ref_data, test_data)
 
-    return eval_data
+    return ref_data, low_lim, upp_lim
 
 
-def handle_binfile(bin_file, orig_file, orig_data):
+def handle_binfile(bin_file, test_file, test_data):
 
     bin_reader = BINFileReader()
-    eval_file_data = bin_reader.read_data(bin_file, orig_file)
+    ref_file_data = bin_reader.read_data(bin_file, test_file)
 
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding bin file with values: {}'.format(np.unique(eval_file_data, return_counts=False)))
-    eval_data = decoder.easegrid_decoding(eval_file_data, orig_data)
-    return eval_data
+    LOG.info('Decoding bin file with values: {}'.format(np.unique(ref_file_data, return_counts=False)))
+    ref_data, low_lim, upp_lim = decoder.easegrid_decoding(ref_file_data, test_data)
+    return ref_data
 
 
-def handle_sigfile(sig_file, orig_file, orig_data):
+def handle_sigfile(sig_file, test_file, test_data):
 
     sig_reader = SIGFileReader()
-    eval_file_data = sig_reader.read_data(sig_file, orig_file)
+    ref_file_data = sig_reader.read_data(sig_file, test_file)
 
     decoder = DecodeSIGRIDCodes()
-    LOG.info('Decoding sig file with values: {}'.format(np.unique(eval_file_data, return_counts=False)))
-    eval_data = decoder.sigrid_decoding(eval_file_data, orig_data)
-    return eval_data
+    LOG.info('Decoding sig file with values: {}'.format(np.unique(ref_file_data, return_counts=False)))
+    ref_data = decoder.sigrid_decoding(ref_file_data, test_data)
+    return ref_data
 
 
 # def handle_osi_ice_conc_nc_file(input_file):
@@ -188,7 +188,8 @@ def handle_osi_ice_conc_nc_file_osi450(input_file, draft):
         mask_flags = np.logical_or.reduce((status_flag & 1 == 1, status_flag & 2 == 2, status_flag & 8 == 8))
     elif draft == 'E':
         mask_flags = np.logical_or.reduce(
-            (status_flag & 32 == 32, status_flag & 64 == 64, status_flag & 128 == 128, status_flag & 2 == 2))
+            (status_flag & 32 == 32, status_flag & 64 == 64, status_flag & 128 == 128,
+             status_flag & 2 == 2, status_flag & 8 == 8, status_flag & 1 == 1))
     ice_conc = np.ma.array(ice_conc, mask=mask_flags)
     ice_conc = np.ma.masked_outside(ice_conc, -0.01, 100.01)
     return ice_conc

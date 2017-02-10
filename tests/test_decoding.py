@@ -11,7 +11,7 @@ def setup_decoding():
 
 
 def test_sigrid_decoding(setup_decoding):
-    data_eval = np.array([[00, 00, 01, 02, 10, 11],
+    data_ref = np.array([[00, 00, 01, 02, 10, 11],
                           [12, 13, 14, 15, 16, 17],
                           [18, 19, 20, 21, 23, 24],
                           [25, 26, 27, 28, 29, 30],
@@ -22,7 +22,7 @@ def test_sigrid_decoding(setup_decoding):
                           [69, 70, 71, 78, 79, 80],
                           [81, 89, 90, 91, 92, 92]])
 
-    data_orig = np.array([[33, 85,  4, 92, 77, 44],
+    data_test = np.array([[33, 85,  4, 92, 77, 44],
                           [76, 18, 88, 18, 44, 32],
                           [12, 68, 34, 37, 56,  4],
                           [51, 61, 77,  7, 95, 98],
@@ -44,24 +44,24 @@ def test_sigrid_decoding(setup_decoding):
                           [60, 70, 70, 70, 85, 80],
                           [80, 80, 90, 90, 100, 100]])
 
-    decoded_data = setup_decoding.sigrid_decoding(data_eval, data_orig)
+    decoded_data = setup_decoding.sigrid_decoding(data_ref, data_test)
     assert np.array_equal(data_expe, decoded_data)
 
 
 
 def test_catch_error(setup_decoding):
-    data_eval = np.array([[13, 24, 91, 91],
+    data_ref = np.array([[13, 24, 91, 91],
                           [00, 01, 01, 35],
                           [68, 65, 40, 79],
                           [68, 92, 91, 81]])
     # Value 65 is not valid and should give a ValueError
-    data_orig = np.array([[20, 8, 100, 100],
+    data_test = np.array([[20, 8, 100, 100],
                           [86, 30, 5, 50],
                           [23, 5, 57, 60],
                           [61, 80, 10, 60]])
 
     try:
-        setup_decoding.sigrid_decoding(data_eval, data_orig)
+        setup_decoding.sigrid_decoding(data_ref, data_test)
     except ValueError:
         assert True
     else:

@@ -33,56 +33,56 @@ Used in decorator for preperaring data
 """
 
 
-def prepare_orig_data(temp_files, orig_file):
+def prepare_test_data(temp_files, test_file):
     raise NotImplementedError
 
 
-def prepare_eval_data(temp_files, eval_file, orig_data, orig_file):
-    local_eval_file = downloader.get(eval_file, cfg.INPUT_DIR)
+def prepare_ref_data(temp_files, ref_file, test_data, test_file):
+    local_ref_file = downloader.get(ref_file, cfg.INPUT_DIR)
 
     # uncompress will return the unpacked shapefile in the staging directory
-    local_eval_file_uncompressed, _temp_files = util.uncompress(
-        local_eval_file)
+    local_ref_file_uncompressed, _temp_files = util.uncompress(
+        local_ref_file)
 
-    temp_files.append(local_eval_file_uncompressed)
+    temp_files.append(local_ref_file_uncompressed)
     if temp_files:
         temp_files.append(_temp_files)
 
-    if eval_file.endswith('.bin'):
+    if ref_file.endswith('.bin'):
         # run the validation step with a driver for handling binary files
-        eval_data = prep.handle_binfile(local_eval_file_uncompressed,
-                                        orig_file, orig_data)
-    elif eval_file.endswith('.sig'):
+        ref_data, low_lim, upp_lim = prep.handle_binfile(local_ref_file_uncompressed,
+                                        test_file, test_data)
+    elif ref_file.endswith('.sig'):
         # run the validation step with a driver for handling sigrid files
-        eval_data = prep.handle_sigfile(local_eval_file_uncompressed,
-                                        orig_file, orig_data)
-    elif eval_file.endswith('.zip'):
+        ref_data,low_lim, upp_lim = prep.handle_sigfile(local_ref_file_uncompressed,
+                                        test_file, test_data)
+    elif ref_file.endswith('.zip'):
         # run the validation step with a driver for handling shapefiles
-        eval_data = prep.handle_shapefile(local_eval_file_uncompressed,
-                                          orig_file, orig_data, temp_files)
+        ref_data, low_lim, upp_lim = prep.handle_shapefile(local_ref_file_uncompressed,
+                                          test_file, test_data, temp_files)
     else:
-        msg = 'I do not know how to open {0}'.format(eval_file)
+        msg = 'I do not know how to open {0}'.format(ref_file)
         raise NotImplementedError(msg)
 
-    return eval_data
+    return ref_data, low_lim, upp_lim
 
 
-def osi_ice_conc_pre_func(ref_time, eval_file, orig_file):
+def osi_ice_conc_pre_func(ref_time, ref_file, test_file):
     """
     Functions like this are expected to return an instance of PreReturn.
     """
     temp_files = TmpFiles()
 
-    orig_data = prepare_orig_data(temp_files, orig_file)
-    eval_data = prepare_eval_data(temp_files, eval_file, orig_data, orig_file)
+    test_data = prepare_test_data(temp_files, test_file)
+    ref_data, low_lim, upp_lim = prepare_ref_data(temp_files, ref_file, test_data, test_file)
 
     # Dump data to files for later visualization
-    dump_data(ref_time, eval_data, orig_data, eval_file, orig_file)
+    dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_lim)
 
-    return PreReturn(temp_files, eval_data, orig_data)
+    return PreReturn(temp_files, ref_data, test_data)
 
 
-# def example_pre_func(ref_time, eval_file, orig_file):
+# def example_pre_func(ref_time, ref_file, test_file):
 #     import numpy as np
 #     temp_files = TmpFiles()
 #     return PreReturn(temp_files, np.array([1, 2, 3, 4]),
@@ -97,22 +97,37 @@ def val_step_star(input_tuple):
 Decorate functions
 """
 
-
 @timethis
 @around_step(pre_func=osi_ice_conc_pre_func, post_func=util.cleanup)
-def ice_conc_val_step(ref_time, data_eval, data_orig):
+def ice_conc_val_step(ref_time, data_ref, data_test):
     run_time = datetime.now().strftime('%Y-%m-%d %H:%m:%S')
-    bias_t = val_func.intermediate_bias(data_eval, data_orig)
-    bias_i = val_func.ice_bias_for_high_in_eval(data_eval, data_orig)
-    bias_w = val_func.water_bias_for_low_in_eval(data_eval, data_orig)
-    stddev_t = val_func.intermediate_std_dev(data_eval, data_orig)
-    stddev_i = val_func.ice_std_dev_for_high_in_eval(data_eval, data_orig)
-    stddev_w = val_func.water_std_dev_for_low_in_eval(data_eval, data_orig)
-    within_10pct = val_func.match_pct(data_eval, data_orig, 10.)
-    within_20pct = val_func.match_pct(data_eval, data_orig, 20.)
+    bias_t = val_func.intermediate_bias(data_ref, data_test)
+    bias_i = val_func.ice_bias(data_ref, data_test)
+    bias_w = val_func.water_bias(data_ref, data_test)
+    stddev_t = val_func.intermediate_std_dev(data_ref, data_test)
+    stddev_i = val_func.ice_std_dev(data_ref, data_test)
+    stddev_w = val_func.water_std_dev(data_ref, data_test)
+    within_10pct = val_func.match_pct(data_ref, data_test, 10.)
+    within_20pct = val_func.match_pct(data_ref, data_test, 20.)
 
     return [ref_time, run_time, bias_t, bias_i, bias_w, stddev_t, stddev_i,
             stddev_w, within_10pct, within_20pct]
+
+# @timethis
+# @around_step(pre_func=osi_ice_conc_pre_func, post_func=util.cleanup)
+# def ice_conc_val_step(ref_time, data_ref, data_test):
+#     run_time = datetime.now().strftime('%Y-%m-%d %H:%m:%S')
+#     bias_t = val_func.intermediate_bias(data_ref, data_test)
+#     bias_i = val_func.ice_bias_for_high_in_eval(data_ref, data_test)
+#     bias_w = val_func.water_bias_for_low_in_eval(data_ref, data_test)
+#     stddev_t = val_func.intermediate_std_dev(data_ref, data_test)
+#     stddev_i = val_func.ice_std_dev_for_high_in_eval(data_ref, data_test)
+#     stddev_w = val_func.water_std_dev_for_low_in_eval(data_ref, data_test)
+#     within_10pct = val_func.match_pct(data_ref, data_test, 10.)
+#     within_20pct = val_func.match_pct(data_ref, data_test, 20.)
+#
+#     return [ref_time, run_time, bias_t, bias_i, bias_w, stddev_t, stddev_i,
+#             stddev_w, within_10pct, within_20pct]
 
 
 @around_task(pre_func=ts.generate_time_series, post_func=util.write_to_csv)
@@ -143,15 +158,15 @@ def collect_pickled_data(config):
 
     dir_ptn = '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
     dir_ptn = os.path.join(config.OUTPUT_DIR, dir_ptn)
-    nh_orig_files = sorted(glob(os.path.join(dir_ptn, '*NH_orig*.pkl')))
-    nh_eval_files = sorted(glob(os.path.join(dir_ptn, '*NH_eval*.pkl')))
-    sh_orig_files = sorted(glob(os.path.join(dir_ptn, '*SH_orig*.pkl')))
-    sh_eval_files = sorted(glob(os.path.join(dir_ptn, '*SH_eval*.pkl')))
+    nh_test_files = sorted(glob(os.path.join(dir_ptn, '*NH_orig*.pkl')))
+    nh_ref_files = sorted(glob(os.path.join(dir_ptn, '*NH_eval*.pkl')))
+    sh_test_files = sorted(glob(os.path.join(dir_ptn, '*SH_orig*.pkl')))
+    sh_ref_files = sorted(glob(os.path.join(dir_ptn, '*SH_eval*.pkl')))
 
-    ds_source = [('data/NH/satellite', nh_orig_files),
-                 ('data/NH/reference', nh_eval_files),
-                 ('data/SH/satellite', sh_orig_files),
-                 ('data/SH/reference', sh_eval_files)]
+    ds_source = [('data/NH/satellite', nh_test_files),
+                 ('data/NH/reference', nh_ref_files),
+                 ('data/SH/satellite', sh_test_files),
+                 ('data/SH/reference', sh_ref_files)]
 
     def read_pkl(path):
         date_str = re.search('\d{4}-\d{2}-\d{2}', path).group(0)

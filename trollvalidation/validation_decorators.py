@@ -14,7 +14,7 @@ LOG = logging.getLogger(__name__)
 #                     datefmt='%Y-%m-%d %H:%M:%S')
 
 
-PreReturn = namedtuple('PreReturn', 'tmpfiles data_eval data_orig')
+PreReturn = namedtuple('PreReturn', 'tmpfiles data_ref data_test')
 
 
 def timethis(func):
@@ -55,9 +55,9 @@ def around_step(pre_func=None, post_func=None):
                 results = pre_actions(ref_time, ice_chart_file, product_file)
 
                 temp_files = results.tmpfiles
-                data_eval, data_orig = results.data_eval, results.data_orig
+                data_ref, data_test = results.data_ref, results.data_test
 
-                results = func(ref_time, data_eval, data_orig)
+                results = func(ref_time, data_ref, data_test)
                 post_actions(results, temp_files.tmpfiles)
 
                 return results

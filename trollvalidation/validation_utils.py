@@ -38,7 +38,10 @@ def setup_directories(input_directory, output_directory):
         try:
             os.unlink(direct)
         except OSError:
-            shutil.rmtree(direct)
+            try:
+                shutil.rmtree(direct)
+            except OSError:
+                pass
         else:
             pass
 
@@ -179,30 +182,27 @@ def uncompress(compressed_file, target=cfg.TMP_DIR):
         return compressed_file, []
 
 
-def dump_data(ref_time, eval_data, orig_data, eval_file, orig_file):
+def dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_lim):
     hemisphere = 'NH'
-    if '_sh_' in os.path.basename(orig_file) or \
-        '_SH_' in os.path.basename(orig_file):
+    if '_sh_' in os.path.basename(test_file) or \
+        '_SH_' in os.path.basename(test_file):
         hemisphere = 'SH'
 
     out_path = os.path.join(cfg.OUTPUT_DIR, ref_time)
-
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
-    eval_data_img = Image.fromarray(eval_data.astype(np.uint8))
+    datas = [('ref', ref_data), ('ref_low', low_lim), ('ref_upp', upp_lim), ('test', test_data)]
+    for data_str, data in datas:
 
-    fname = os.path.join(out_path, '{0}_{1}_eval_data.bmp'.format(
-        cfg.VALIDATION_ID, hemisphere))
-    eval_data_img.save(fname)
-    eval_data.dump(fname.replace('.bmp', '.pkl'))
+        fname_base = os.path.join(out_path, '{0}_{1}_{2}_data'.format(
+            cfg.VALIDATION_ID, hemisphere, data_str))
 
-    filenames = {'satellite_file': orig_file, 'reference_file': eval_file}
-    with open(fname.replace('.bmp', '.json'), 'w') as fp:
+        data_img = Image.fromarray(data.astype(np.uint8))
+        data_img.save(fname_base + '.bmp')
+
+        data.dump(fname_base + '.pkl')
+
+    filenames = {'test_file': test_file, 'ref_file': ref_file}
+    with open(fname_base + '.json', 'w') as fp:
         json.dump(filenames, fp)
-
-    orig_data_img = Image.fromarray(orig_data.astype(np.uint8))
-    fname = os.path.join(out_path, '{0}_{1}_orig_data.bmp'.format(
-        cfg.VALIDATION_ID, hemisphere))
-    orig_data_img.save(fname)
-    orig_data.dump(fname.replace('.bmp', '.pkl'))

@@ -17,7 +17,7 @@ from trollvalidation.validation_decorators import timethis, around_step, \
     around_task, PreReturn
 import configuration as cfg
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,
@@ -43,18 +43,18 @@ def generate_time_series():
     return zip(times_str, eval_paths, orig_paths)
 
 
-def pre_func(ref_time, eval_file, orig_file):
+def pre_func(ref_time, ref_file, test_file):
     temp_files = TmpFiles()
 
-    def prepare_orig_data():
-        orig_data = np.array([1, 2, 3, 4])
-        return orig_data
+    def prepare_test_data():
+        test_data = np.array([1, 2, 3, 4])
+        return test_data
 
-    def prepare_eval_data():
-        eval_data = np.array([1, 2, 3, 4])
-        return eval_data
+    def prepare_ref_data():
+        ref_data = np.array([1, 2, 3, 4])
+        return ref_data
 
-    return PreReturn(temp_files, prepare_eval_data(), prepare_orig_data())
+    return PreReturn(temp_files, prepare_ref_data(), prepare_test_data())
 
 
 def val_step_star(input_tuple):
@@ -63,12 +63,12 @@ def val_step_star(input_tuple):
 
 @timethis
 @around_step(pre_func=pre_func, post_func=util.cleanup)
-def val_step(ref_time, data_eval, data_orig):
+def val_step(ref_time, data_ref, data_test):
     run_time = datetime.now().strftime('%Y-%m-%d %H:%m:%S')
     # TODO: implement your validation function in or choose one of
     # validation_functions.py
-    # val_value = val_func.my_func(data_eval, data_orig)
-    val_value = data_eval - data_orig
+    # val_value = val_func.my_func(data_ref, data_test)
+    val_value = data_ref - data_test
 
     return [ref_time, run_time, val_value]
 

@@ -65,20 +65,20 @@ LOG = logging.getLogger(__name__)
 class DecodeSIGRIDCodes(object):
 
     @staticmethod
-    def valid_values_check(data_eval, expected):
-        for v in np.unique(data_eval):
+    def valid_values_check(data_ref, expected):
+        for v in np.unique(data_ref):
             if (not v in expected) and (not isinstance(v, np.ma.core.MaskedConstant)):
                     raise ValueError('Unexpected value in file: {0}'.format(v))
 
-    def intervals_to_sigrid_codes(self, data_eval):
+    def intervals_to_sigrid_codes(self, data_ref):
         """
         Convert the bin intervals to the corresponding sigrid codes
         For documentation on the bin files:
         https://nsidc.org/data/docs/noaa/g02172_nic_charts_climo_grid/#format
         """
         expected = np.append(np.arange(0, 101, 5), 5)
-        self.valid_values_check(data_eval, expected)
-        de = data_eval
+        self.valid_values_check(data_ref, expected)
+        de = data_ref
         # condition_choices is [(de == concentration_interval, sigrid_code), ...]
         condition_choice = [
             (de == 99, 255),
@@ -86,7 +86,7 @@ class DecodeSIGRIDCodes(object):
             (de == 95,  91),
             (de == 100, 92),
             (de == 00,  00),
-            ((de % 10 == 0), de - 10, de + 10)
+            ((de % 10 == 0), de, de)
             ]
         condition, choice = zip(*condition_choice)
         codes = np.select(condition, choice, default=de)
@@ -96,8 +96,8 @@ class DecodeSIGRIDCodes(object):
 
         return codes
 
-    def sigrid_decoding(self, data_eval, data_orig):
-        data_eval = data_eval.astype(int)
+    def sigrid_decoding(self, data_ref, data_test):
+        data_ref = data_ref.astype(int)
 
         # Check that there are no unexpected values
 
@@ -105,11 +105,11 @@ class DecodeSIGRIDCodes(object):
                     26, 27, 28, 29, 30, 31, 34, 35, 36, 37, 38, 39, 40, 41, 45, 46, 47, 48,
                     49, 50, 51, 56, 57, 58, 59, 60, 61, 67, 68, 69, 70, 71, 78, 79, 80, 81,
                     89, 90, 91, 92, 255]
-        self.valid_values_check(data_eval, expected)
+        self.valid_values_check(data_ref, expected)
 
         # Convert the sigrid codes to upper and lower limits of ice concentration
 
-        de = data_eval
+        de = data_ref
         cl = 10 * (de // 10)  # lower code: 1st digit * 10
         cu = 10 * (de % 10)   # upper code: 2nd digit * 10
         condition_choices = [
@@ -138,13 +138,13 @@ class DecodeSIGRIDCodes(object):
             u, l = upper_limit[upper_limits < lower_limits], lower_limits[upper_limits < lower_limits]
             raise ValueError('Sigrid decoding invalid: {0} (upper) < {1} (lower)'.format(u, l))
 
-        # The variable 'reference' is the closet possible value of the NIC data to data_orig, given that the NIC data
+        # The variable 'reference' is the closet possible value of the NIC data to data_test, given that the NIC data
         # can be an interval. So, if the NIC sigrid codes specify limit, they converted to a reference as follows:
-        #   * if data_orig is within the bounds of the NIC limits, reference = data_orig
+        #   * if data_test is within the bounds of the NIC limits, reference = data_test
         #   * otherwise, reference is equal to the closest limit of the NIC interval.
-        # If the NIC codes are specific values, rather that limits, 'reference' is equal to data_eval
+        # If the NIC codes are specific values, rather that limits, 'reference' is equal to data_ref
 
-        do, ll, ul = data_orig, lower_limits, upper_limits
+        do, ll, ul = data_test, lower_limits, upper_limits
         # 'condition_choice' is a follows: [(interval, choice),...]
         condition_choice = [((do >= ll) & (do <= ul), do),
                             (do < ll,                 ll),
@@ -155,118 +155,13 @@ class DecodeSIGRIDCodes(object):
         if np.any(np.isnan(reference)):
             LOG.info('The file contains undetermined values')
 
-        if isinstance(data_eval, np.ma.core.MaskedArray):
-            reference = ma.array(reference, mask=(data_eval.mask | np.isnan(reference)))
+        if isinstance(data_ref, np.ma.core.MaskedArray):
+            reference = ma.masked_invalid(data_ref)
 
-        return reference
+        return reference, lower_limits, upper_limits
 
-    def easegrid_decoding(self, data_eval, product_file_data):
-        data_eval = data_eval.astype(int)
-        sigrid_codes = self.intervals_to_sigrid_codes(data_eval)
-        reference = self.sigrid_decoding(sigrid_codes, product_file_data)
-        return reference
-
-    # def sigrid_decoding(self, data_eval, data_orig):
-    #     """
-    #     Decodes a
-    #     SIGRID ice codes: http://www.natice.noaa.gov/products/sigrid.html
-    #     :param data_eval: np.array|np.ma.array
-    #         An array holding SIGRID ice concentration codes,
-    #         which originate from a shapefile or a sig file
-    #     :param data_orig: np.array|np.ma.array
-    #         An array holding ice concentration values in the range 0 .. 100
-    #         in one percent steps. 0 means open water and 100 is the highest
-    #         possible ice concentration.
-    #     :return: np.array|np.ma.array
-    #         Returns a modified version of data_eval, where all numbers
-    #         are replaced according to the following rules:
-    #
-    #         0..9                ->  0
-    #         92                  ->  100
-    #         (?P<fst>\d{1})1     ->  fst0,           if val(data_orig) < fst0
-    #                                 100,            if val(data_orig) > 100
-    #                                 val(data_orig)  if fst0 <= val(data_orig) <= 100
-    #         (?P<fst>\d{1})(?P<snd>\d{1})
-    #                             ->  fst0,           if val(data_orig) < fst0
-    #                                 100,            if val(data_orig) > snd0
-    #                                 val(data_orig)  if fst0 <= val(data_orig) <= snd0
-    #     """
-    #     # We think there should not be any values like 51, 52, 53, 54, 55
-    #     # If this one is hit we have to talk about the SIGRID code conversion
-    #     # again
-    #     # undesired_values = data_eval[(data_eval % 10 != 1) & (data_eval != 92) &
-    #     #                    (data_eval % 10 != 0) &
-    #     #                    (data_eval / 10 >= data_eval % 10)]
-    #     # if not undesired_values == []:
-    #     #     assert data_eval[(data_eval % 10 != 1) & (data_eval != 92) &
-    #     #                      (data_eval % 10 != 0) &
-    #     #                      (data_eval / 10 >= data_eval % 10)].any() == False
-    #
-    #     LOG.debug('data_eval unique values {}'.format(np.unique(data_eval)))
-    #
-    #     expected_vals = [0.0, 1.0, 2.0, 13.0, 24.0, 35.0, 46.0, 57.0, 68.0, 79.0, 81.0, 91.0, 92.0, 99.0]
-    #     vals = np.unique(data_eval)
-    #     for v in vals:
-    #         if (not v in expected_vals) and (not isinstance(v, np.ma.core.MaskedConstant)):
-    #             raise ValueError('Value {0} was not expected in sigrid code'.format(v))
-    #
-    #     was_masked = False
-    #     if isinstance(data_eval, np.ma.core.MaskedArray):
-    #         mask = data_eval.mask
-    #         was_masked = True
-    #
-    #     # set water to 0
-    #     condition = (data_eval < 9)
-    #     processed = condition
-    #     data_eval[condition] = 0
-    #
-    #     # set 92 to 100
-    #     condition = (processed != True) & (data_eval == 92)
-    #     processed = processed | condition
-    #     data_eval[condition] = 100
-    #
-    #     # handle 21, 31, 41, 51, 61, 71, 81, 91
-    #     condition = (processed != True) & (data_eval % 10 == 1) & \
-    #                 (data_orig == 100)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, 100, data_eval)
-    #
-    #     condition = (processed != True) & (data_eval % 10 == 1) & \
-    #                 (data_orig < (data_eval / 10) * 10)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, (data_eval / 10) * 10, data_eval)
-    #
-    #     condition = (processed != True) & (data_eval % 10 == 1) & \
-    #                 (data_orig >= (data_eval / 10) * 10) & (data_orig < 100)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, data_orig, data_eval)
-    #
-    #     condition = (data_eval == 91) & (data_orig < 90)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, 90, data_eval)
-    #
-    #     condition = (data_eval == 91) & (data_orig >= 90) & (data_orig <= 100)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, data_orig, data_eval)
-    #
-    #     # handle other intervals, i.e., SIGRID codes such as 34, 46,
-    #     condition = (processed != True) & (data_eval % 10 != 0) & \
-    #                 (data_orig > (data_eval % 10) * 10)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, (data_eval % 10) * 10, data_eval)
-    #
-    #     condition = (processed != True) & (data_eval % 10 != 0) & \
-    #                 (data_orig < (data_eval / 10) * 10)
-    #     processed = processed | condition
-    #     data_eval = np.where(condition, (data_eval / 10) * 10, data_eval)
-    #
-    #     condition = (processed != True) & (data_eval % 10 != 0) & \
-    #                 (data_orig >= (data_eval / 10) * 10) & \
-    #                 (data_orig <= (data_eval % 10) * 10)
-    #     data_eval = np.where(condition, data_orig, data_eval)
-    #
-    #
-    #     if was_masked:
-    #         data_eval = np.ma.array(data_eval, mask=mask)
-    #
-    #     return data_eval
+    def easegrid_decoding(self, data_ref, product_file_data):
+        data_ref = data_ref.astype(int)
+        sigrid_codes = self.intervals_to_sigrid_codes(data_ref)
+        reference, low_lim, upp_lim = self.sigrid_decoding(sigrid_codes, product_file_data)
+        return reference, low_lim, upp_lim
