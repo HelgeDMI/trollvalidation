@@ -12,7 +12,7 @@ import pandas as pd
 import pyresample as pr
 from PIL import Image
 
-import configuration as cfg
+from configuration import Configuration as cfg
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,

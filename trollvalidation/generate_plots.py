@@ -11,7 +11,7 @@ from datetime import datetime
 import glob
 import os
 import logging
-import configuration as cfg
+from configuration import Configuration as cfg
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,

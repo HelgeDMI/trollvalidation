@@ -8,7 +8,7 @@ from collections import OrderedDict
 from dateutil import parser
 
 from trollvalidation.data_collectors import downloader
-import configuration as cfg
+from configuration import Configuration as cfg
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,

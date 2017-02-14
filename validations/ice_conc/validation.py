@@ -17,7 +17,7 @@ from trollvalidation.validation_decorators import timethis, around_step, \
     around_task, PreReturn
 from trollvalidation.validation_utils import TmpFiles
 from trollvalidation.validation_utils import dump_data
-import configuration as cfg
+from configuration import Configuration as cfg
 from trollvalidation.writer import WriteNetCDF
 
 

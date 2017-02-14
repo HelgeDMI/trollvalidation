@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import configuration as cfg
+from configuration import Configuration as cfg
 import ice_conc.validation as val
 # from ...ice_conc.validation import validation as val
 import os, sys
