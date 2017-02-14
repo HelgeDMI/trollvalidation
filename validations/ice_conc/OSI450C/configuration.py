@@ -1,5 +1,4 @@
-from trollvalidation.validations.template_ice_conc_OSI.configuration import *
-from trollvalidation.validations.template_ice_conc_OSI import configuration as cfg
+from validations.OSISAF import configuration as cfg
 
 print('CONFIG OSI450C')
 

@@ -8,6 +8,7 @@ import sys
 import urllib2
 from subprocess import Popen, PIPE
 from urllib2 import urlopen
+
 import configuration as cfg
 
 LOG = logging.getLogger('nic_downloader')

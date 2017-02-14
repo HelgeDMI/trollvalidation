@@ -49,9 +49,8 @@ if END_YEAR == START_YEAR:
     END_YEAR += 1
 
 AREAS = 'etc/areas.cfg'
-DESCRIPTION = 'Comparison of NIC ice charts and OSI-450 products for {0}' \
-' hemisphere'
-SHORT_DESCRIPTION = 'OSI450C_validation_{0}_{1}'  # hemisphere, date
+DESCRIPTION = None  # Define this
+SHORT_DESCRIPTION = None  # Define this
 
 METNO_DOWNL = {
     'protocol': 'ftp://',

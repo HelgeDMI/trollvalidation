@@ -2,8 +2,9 @@
 # validation_utils.py
 
 
-import numpy as np
 import matplotlib
+import numpy as np
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -11,7 +12,6 @@ import glob
 import os
 import logging
 import configuration as cfg
-
 
 LOG = logging.getLogger(__name__)
 # logging.basicConfig(level=logging.DEBUG,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-import trollvalidation.validations.template_ice_conc_OSI.validation as val
 import configuration as cfg
+import validations.OSISAF.validation as val
 
 
 def prepare_test_data(temp_files, test_file):
@@ -16,12 +16,12 @@ def prepare_test_data(temp_files, test_file):
         local_test_file = val.downloader.get(test_file, cfg.INPUT_DIR)
         # uncompress file if necessary
         local_test_file_uncompressed, _ = val.util.uncompress(local_test_file)
-        test_data = val.prep.handle_osi_ice_conc_nc_file_osi450(
-            local_test_file_uncompressed, draft='C')
+        test_data = val.prep.handle_osi_ice_conc_nc_file(
+            local_test_file_uncompressed)
         temp_files.append([local_test_file_uncompressed, local_test_file])
     else:
         # otherwise give it directly to the Dataset reader
-        test_data = val.prep.handle_osi_ice_conc_nc_file_osi450(test_file, draft='C')
+        test_data = val.prep.handle_osi_ice_conc_nc_file(test_file)
 
     return test_data
 

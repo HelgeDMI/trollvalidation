@@ -18,6 +18,7 @@ from trollvalidation.validation_decorators import timethis, around_step, \
 from trollvalidation.validation_utils import TmpFiles
 from trollvalidation.validation_utils import dump_data
 import configuration as cfg
+from trollvalidation.writer import WriteNetCDF
 
 
 # LOG = mp.log_to_stderr()
@@ -54,7 +55,7 @@ def prepare_ref_data(temp_files, ref_file, test_data, test_file):
                                         test_file, test_data)
     elif ref_file.endswith('.sig'):
         # run the validation step with a driver for handling sigrid files
-        ref_data,low_lim, upp_lim = prep.handle_sigfile(local_ref_file_uncompressed,
+        ref_data, low_lim, upp_lim = prep.handle_sigfile(local_ref_file_uncompressed,
                                         test_file, test_data)
     elif ref_file.endswith('.zip'):
         # run the validation step with a driver for handling shapefiles
@@ -158,15 +159,25 @@ def collect_pickled_data(config):
 
     dir_ptn = '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
     dir_ptn = os.path.join(config.OUTPUT_DIR, dir_ptn)
-    nh_test_files = sorted(glob(os.path.join(dir_ptn, '*NH_orig*.pkl')))
-    nh_ref_files = sorted(glob(os.path.join(dir_ptn, '*NH_eval*.pkl')))
-    sh_test_files = sorted(glob(os.path.join(dir_ptn, '*SH_orig*.pkl')))
-    sh_ref_files = sorted(glob(os.path.join(dir_ptn, '*SH_eval*.pkl')))
 
-    ds_source = [('data/NH/satellite', nh_test_files),
+    nh_test_files = sorted(glob(os.path.join(dir_ptn, '*NH_test*.pkl')))
+    nh_ref_low_files = sorted(glob(os.path.join(dir_ptn, '*NH_ref_low*.pkl')))
+    nh_ref_upp_files = sorted(glob(os.path.join(dir_ptn, '*NH_ref_upp*.pkl')))
+    nh_ref_files = sorted(glob(os.path.join(dir_ptn, '*NH_ref*.pkl')))
+
+    sh_test_files = sorted(glob(os.path.join(dir_ptn, '*SH_test*.pkl')))
+    sh_ref_files = sorted(glob(os.path.join(dir_ptn, '*SH_ref*.pkl')))
+    sh_ref_low_files = sorted(glob(os.path.join(dir_ptn, '*SH_ref_low*.pkl')))
+    sh_ref_upp_files = sorted(glob(os.path.join(dir_ptn, '*SH_ref_upp*.pkl')))
+
+    ds_source = [('data/NH/test', nh_test_files),
                  ('data/NH/reference', nh_ref_files),
-                 ('data/SH/satellite', sh_test_files),
-                 ('data/SH/reference', sh_ref_files)]
+                 ('data/NH/reference_low_lim', nh_ref_low_files),
+                 ('data/NH/reference_upp_lim', nh_ref_upp_files),
+                 ('data/SH/test', sh_test_files),
+                 ('data/SH/reference', sh_ref_files),
+                 ('data/SH/reference_low_lim', sh_ref_low_files),
+                 ('data/SH/reference_upp_lim', sh_ref_upp_files)]
 
     def read_pkl(path):
         date_str = re.search('\d{4}-\d{2}-\d{2}', path).group(0)
@@ -183,16 +194,35 @@ def collect_pickled_data(config):
         datas = ma.array(datas, mask=masks, fill_value=np.nan)
         return dates, datas
 
+    def add_dim(data):
+        shape2d = [1]
+        shape2d.extend(data.shape)
+        data = data.reshape(shape2d)
+        return data
+
     path_to_output = os.path.join(config.OUTPUT_DIR, config.PICKLED_DATA)
-    hdf5 = h5py.File(path_to_output, 'w')
-    data_grp = hdf5.create_group('maps')
+
+    w = WriteNetCDF(path_to_output)
+
     for ds_name, files in ds_source:
         if files:
             dates, data = stack_data(files)
-            ds = data_grp.create_dataset(ds_name, data.shape, data=data.filled(),
-                                         dtype='f', compression="gzip")
-            ds.attrs['dates'] = np.array(dates)
-    hdf5.close()
+            w.np_array_to_nc(lat, 'lat', ('lat',),
+                             unit='degrees', longname='Latitude', least_significant_digit=1, fill_value=None)
+
+            w.np_array_to_nc(add_dim(np.array(dates)), 'time', ('time', 'lat', 'lon'))
+
+
+
+    # hdf5 = h5py.File(path_to_output, 'w')
+    # data_grp = hdf5.create_group('maps')
+    # for ds_name, files in ds_source:
+    #     if files:
+    #         dates, data = stack_data(files)
+    #         ds = data_grp.create_dataset(ds_name, data.shape, data=data.filled(),
+    #                                      dtype='f', compression="gzip")
+    #         ds.attrs['dates'] = np.array(dates)
+    # hdf5.close()
 
 
 def cleanup(config):
@@ -212,12 +242,12 @@ def main(config):
     args = util.arg_parser()
     util.setup_directories(args.input_directory, args.output_directory)
 
-    desc = cfg.DESCRIPTION.format('northern')
-    desc_str = cfg.SHORT_DESCRIPTION.format('NH', date.today())
+    desc = config.DESCRIPTION.format('northern')
+    desc_str = config.SHORT_DESCRIPTION.format('NH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
 
-    desc = cfg.DESCRIPTION.format('southern')
-    desc_str = cfg.SHORT_DESCRIPTION.format('SH', date.today())
+    desc = config.DESCRIPTION.format('southern')
+    desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
 
     if 'PICKLED_DATA' in config.__dict__.keys():

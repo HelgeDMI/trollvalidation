@@ -1,16 +1,17 @@
+import argparse
 import gzip
+import json
 import logging
 import os
 import shutil
 import uuid
-from PIL import Image
 from zipfile import ZipFile
-import argparse
-import json
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pyresample as pr
+from PIL import Image
+
 import configuration as cfg
 
 LOG = logging.getLogger(__name__)
@@ -198,8 +199,9 @@ def dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_l
         fname_base = os.path.join(out_path, '{0}_{1}_{2}_data'.format(
             cfg.VALIDATION_ID, hemisphere, data_str))
 
-        data_img = Image.fromarray(data.astype(np.uint8))
-        data_img.save(fname_base + '.bmp')
+        if data_str == 'ref' or data_str == 'test':
+            data_img = Image.fromarray(data.astype(np.uint8))
+            data_img.save(fname_base + '.bmp')
 
         data.dump(fname_base + '.pkl')
 

@@ -95,7 +95,7 @@ def handle_binfile(bin_file, test_file, test_data):
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding bin file with values: {}'.format(np.unique(ref_file_data, return_counts=False)))
     ref_data, low_lim, upp_lim = decoder.easegrid_decoding(ref_file_data, test_data)
-    return ref_data
+    return ref_data, low_lim, upp_lim
 
 
 def handle_sigfile(sig_file, test_file, test_data):
@@ -106,7 +106,7 @@ def handle_sigfile(sig_file, test_file, test_data):
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding sig file with values: {}'.format(np.unique(ref_file_data, return_counts=False)))
     ref_data = decoder.sigrid_decoding(ref_file_data, test_data)
-    return ref_data
+    return ref_data, low_lim, upp_lim
 
 
 # def handle_osi_ice_conc_nc_file(input_file):

@@ -5,9 +5,9 @@ import os
 import re
 from collections import OrderedDict
 
-from trollvalidation.data_collectors import downloader
 from dateutil import parser
 
+from trollvalidation.data_collectors import downloader
 import configuration as cfg
 
 LOG = logging.getLogger(__name__)
