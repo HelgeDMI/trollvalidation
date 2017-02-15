@@ -9,7 +9,7 @@ class Configuration(ConfigurationBase):
     DESCRIPTION = 'Comparison of NIC ice charts and OSI-450 Draft E products for {0}' \
     ' hemisphere'
     SHORT_DESCRIPTION = 'OSI450E_validation_{0}_{1}'  # hemisphere, date
-    PICKLED_DATA = 'OSI450E_val_data.hdf5'
+    PICKLED_DATA = 'OSI450E_val_data.nc'
 
     METNO_THREDDS_DOWNL = ConfigurationBase.METNO_THREDDS_DOWNL
     METNO_THREDDS_DOWNL['remote_dir_f_pattern'] = 'thredds/dodsC/metusers/sicci_shared/osisaf/v2.0draftE/{0}/{1}/' \

@@ -109,18 +109,18 @@ class DecodeSIGRIDCodes(object):
 
         # Convert the sigrid codes to upper and lower limits of ice concentration
 
-        de = data_ref
-        cl = 10 * (de // 10)  # lower code: 1st digit * 10
-        cu = 10 * (de % 10)   # upper code: 2nd digit * 10
+        dr = data_ref
+        cl = 10 * (dr // 10)  # lower code: 1st digit * 10
+        cu = 10 * (dr % 10)   # upper code: 2nd digit * 10
         condition_choices = [
-            (de == 255, np.nan, np.nan),
-            (de == 00, 0,  0),
-            (de == 01, 0, 10),
-            (de == 02, 0, 10),  # TODO: Check this
-            (de == 92, 100, 100),
+            (dr == 255, np.nan, np.nan),
+            (dr == 00, 0,  0),
+            (dr == 01, 0, 10),
+            (dr == 02, 0, 10),  # TODO: Check this
+            (dr == 92, 100, 100),
             (cu == 10, cl, 100),        # 21, 31, 41, 51, 61, 71, 81, 91
-            (cu == 00, de, de),         # 10, 20, 30, 40, 50, 60, 70, 80, 90
-            (~(de % 10 == 0), cl, cu)   # 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25,
+            (cu == 00, dr, dr),         # 10, 20, 30, 40, 50, 60, 70, 80, 90
+            (~(dr % 10 == 0), cl, cu)   # 12, 13, 14, 15, 16, 17, 18, 19, 23, 24, 25,
                                         # 26, 27, 28, 29, 34, 35, 36, 37, 38, 39, 45,
                                         # 46, 47, 48, 49, 56, 57, 58, 59, 67, 68, 69,
                                         # 78, 79, 89
@@ -130,7 +130,7 @@ class DecodeSIGRIDCodes(object):
         upper_limits = np.select(condition, upper_limit, default=-128)
 
         if (-128 in lower_limits) or (-128 in upper_limits):
-            raise ValueError('Values {} not decoded'.format(de[(lower_limits == -128) | (upper_limits == -128)]))
+            raise ValueError('Values {} not decoded'.format(dr[(lower_limits == -128) | (upper_limits == -128)]))
 
         try:
             assert np.any((upper_limits >= lower_limits) | np.isnan(upper_limits) | np.isnan(lower_limits))
@@ -144,19 +144,21 @@ class DecodeSIGRIDCodes(object):
         #   * otherwise, reference is equal to the closest limit of the NIC interval.
         # If the NIC codes are specific values, rather that limits, 'reference' is equal to data_ref
 
-        do, ll, ul = data_test, lower_limits, upper_limits
+        dt, ll, ul = data_test, lower_limits, upper_limits
         # 'condition_choice' is a follows: [(interval, choice),...]
-        condition_choice = [((do >= ll) & (do <= ul), do),
-                            (do < ll,                 ll),
-                            (do > ul,                 ul)]
+
+        condition_choice = [((dt >= ll) & (dt <= ul), dt),
+                             (dt < ll,                ll),
+                             (dt > ul,                ul)]
         cond, choice = zip(*condition_choice)
-        reference = np.select(cond, choice, default=de)
+        reference = np.select(cond, choice, default=np.nan)
 
         if np.any(np.isnan(reference)):
             LOG.info('The file contains undetermined values')
 
+        reference = ma.masked_invalid(reference)
         if isinstance(data_ref, np.ma.core.MaskedArray):
-            reference = ma.masked_invalid(data_ref)
+            reference = ma.array(reference, mask=data_ref.mask)
 
         return reference, lower_limits, upper_limits
 

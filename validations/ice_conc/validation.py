@@ -74,11 +74,11 @@ def osi_ice_conc_pre_func(ref_time, ref_file, test_file):
     """
     temp_files = TmpFiles()
 
-    test_data = prepare_test_data(temp_files, test_file)
+    test_data, lat, lon = prepare_test_data(temp_files, test_file)
     ref_data, low_lim, upp_lim = prepare_ref_data(temp_files, ref_file, test_data, test_file)
 
     # Dump data to files for later visualization
-    dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_lim)
+    dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_lim, lat, lon)
 
     return PreReturn(temp_files, ref_data, test_data)
 
@@ -202,27 +202,25 @@ def collect_pickled_data(config):
 
     path_to_output = os.path.join(config.OUTPUT_DIR, config.PICKLED_DATA)
 
-    w = WriteNetCDF(path_to_output)
-
-    for ds_name, files in ds_source:
-        if files:
-            dates, data = stack_data(files)
-            w.np_array_to_nc(lat, 'lat', ('lat',),
-                             unit='degrees', longname='Latitude', least_significant_digit=1, fill_value=None)
-
-            w.np_array_to_nc(add_dim(np.array(dates)), 'time', ('time', 'lat', 'lon'))
-
-
-
-    # hdf5 = h5py.File(path_to_output, 'w')
-    # data_grp = hdf5.create_group('maps')
+    # w = WriteNetCDF(path_to_output)
+    #
     # for ds_name, files in ds_source:
     #     if files:
     #         dates, data = stack_data(files)
-    #         ds = data_grp.create_dataset(ds_name, data.shape, data=data.filled(),
-    #                                      dtype='f', compression="gzip")
-    #         ds.attrs['dates'] = np.array(dates)
-    # hdf5.close()
+    #         w.np_array_to_nc(lat, 'lat', ('lat',),
+    #                          unit='degrees', longname='Latitude', least_significant_digit=1, fill_value=None)
+    #
+    #         w.np_array_to_nc(add_dim(np.array(dates)), 'time', ('time', 'lat', 'lon'))
+
+    hdf5 = h5py.File(path_to_output, 'w')
+    data_grp = hdf5.create_group('maps')
+    for ds_name, files in ds_source:
+        if files:
+            dates, data = stack_data(files)
+            ds = data_grp.create_dataset(ds_name, data.shape, data=data.filled(),
+                                         dtype='f', compression="gzip")
+            ds.attrs['dates'] = np.array(dates)
+    hdf5.close()
 
 
 def cleanup(config):
@@ -250,5 +248,5 @@ def main(config):
     desc_str = config.SHORT_DESCRIPTION.format('SH', date.today())
     ice_conc_val_task(description=desc, description_str=desc_str)
 
-    if 'PICKLED_DATA' in config.__dict__.keys():
-        collect_pickled_data(config)
+    # if 'PICKLED_DATA' in config.__dict__.keys():
+    #     collect_pickled_data(config)

@@ -25,27 +25,47 @@ def total_std_dev(data_ref, data_test):
 
 
 def ice_bias(data_ref, data_test):
-    only_ice_in_chart = np.ma.array(data_ref, mask=data_ref == 0)
+    only_ice_in_chart = np.ma.masked_outside(data_ref, 99, 100.1)
     diff = data_test - only_ice_in_chart
     return diff.mean()
 
 
 def ice_std_dev(data_ref, data_test):
-    only_ice_in_chart = np.ma.array(data_ref, mask=data_ref == 0)
+    only_ice_in_chart = np.ma.masked_outside(data_ref, 99, 100.1)
     diff = data_test - only_ice_in_chart
     return diff.std()
 
 
 def water_bias(data_ref, data_test):
-    only_water_in_chart = np.ma.array(data_ref, mask=data_ref > 0)
+    only_water_in_chart = np.ma.masked_outside(data_ref, -0.1, 1)
     diff = data_test - only_water_in_chart
     return diff.mean()
 
 
 def water_std_dev(data_ref, data_test):
-    only_water_in_chart = np.ma.array(data_ref, mask=data_ref > 0)
+    only_water_in_chart = np.ma.masked_outside(data_ref, -0.1, 1)
     diff = data_test - only_water_in_chart
     return diff.std()
+
+
+def intermediate_bias(data_ref, data_test):
+    only_intermediate_in_chart = np.ma.masked_outside(data_ref, 1, 99)
+    diff = data_test - only_intermediate_in_chart
+    return diff.mean()
+
+
+def intermediate_std_dev(data_ref, data_test):
+    only_water_in_chart = np.ma.masked_outside(data_ref, 1, 99)
+    diff = data_test - only_water_in_chart
+    return diff.std()
+
+
+# def intermediate_std_dev(data_ref, data_test):
+#     only_intermediate_in_chart = np.ma.masked_outside(data_ref, 1, 99)
+#     intermediate_ice_in_chart = np.ma.array(data_ref, mask=only_intermediate_in_chart)
+#     diff = data_test - intermediate_ice_in_chart
+#     return diff.std()
+
 
 
 def rmsdiff(data_ref, data_test):
@@ -120,16 +140,16 @@ def water_std_dev_for_low_in_eval(data_ref, data_test):
 #     diff = data_test - intermediate_ice_in_chart
 #     return diff.std()
 
-def intermediate_bias(data_ref, data_test):
-    mask_expr = ~((data_ref > 0) * (data_ref < 90))
-    intermediate_ice_in_chart = np.ma.array(data_ref, mask=mask_expr)
-    diff = data_test - intermediate_ice_in_chart
-    return diff.mean()
-
-
-def intermediate_std_dev(data_ref, data_test):
-    mask_expr = ~((data_ref > 0) * (data_ref < 90))
-    intermediate_ice_in_chart = np.ma.array(data_ref, mask=mask_expr)
-    diff = data_test - intermediate_ice_in_chart
-    return diff.std()
+# def intermediate_bias(data_ref, data_test):
+#     mask_expr = ~((data_ref > 0) * (data_ref < 90))
+#     intermediate_ice_in_chart = np.ma.array(data_ref, mask=mask_expr)
+#     diff = data_test - intermediate_ice_in_chart
+#     return diff.mean()
+#
+#
+# def intermediate_std_dev(data_ref, data_test):
+#     mask_expr = ~((data_ref > 0) * (data_ref < 90))
+#     intermediate_ice_in_chart = np.ma.array(data_ref, mask=mask_expr)
+#     diff = data_test - intermediate_ice_in_chart
+#     return diff.std()
 

@@ -33,8 +33,9 @@ import pandas as pd
 
 
 class Configuration:
-    # YEARS_OF_INTEREST = range(1972, 2017)
-    YEARS_OF_INTEREST = [2006, ]
+    YEARS_OF_INTEREST = range(1972, 2017)
+    # YEARS_OF_INTEREST = [2004, ]
+    # YEARS_OF_INTEREST = range(2010, 2013)
 
     CSV_HEADER = ['reference_time', 'run_time', 'intermediate_bias', 'ice_bias',
                   'water_bias', 'intermediate_stddev', 'ice_stddev', 'water_stddev',

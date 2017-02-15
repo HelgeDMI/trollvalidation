@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-import configuration as cfg
-import validations.OSISAF.validation as val
+import os, sys
+sys.path.append(os.path.join('../..', os.path.dirname(__file__)))
+import ice_conc.validation as val
+from configuration import Configuration as cfg
 
 
 def prepare_test_data(temp_files, test_file):

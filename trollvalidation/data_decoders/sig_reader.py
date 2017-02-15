@@ -143,7 +143,7 @@ class SIGFileReader(object):
         area_con = swath_con.resample(target_area_def)
         reprojected_data = area_con.image_data
 
-        return reprojected_data
+        return reprojected_data, self.lats, self.lons
 
     def read_data(self, input_file, product_file):
         _ = self._read_sig_file(input_file)

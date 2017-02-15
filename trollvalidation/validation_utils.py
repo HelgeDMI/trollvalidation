@@ -183,7 +183,7 @@ def uncompress(compressed_file, target=cfg.TMP_DIR):
         return compressed_file, []
 
 
-def dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_lim):
+def dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_lim, lat, lon):
     hemisphere = 'NH'
     if '_sh_' in os.path.basename(test_file) or \
         '_SH_' in os.path.basename(test_file):
@@ -193,7 +193,8 @@ def dump_data(ref_time, ref_data, test_data, ref_file, test_file, low_lim, upp_l
     if not os.path.exists(out_path):
         os.makedirs(out_path)
 
-    datas = [('ref', ref_data), ('ref_low', low_lim), ('ref_upp', upp_lim), ('test', test_data)]
+    datas = [('ref', ref_data), ('ref_low', low_lim), ('ref_upp', upp_lim),
+             ('test', test_data), ('lat', lat), ('lon', lon)]
     for data_str, data in datas:
 
         fname_base = os.path.join(out_path, '{0}_{1}_{2}_data'.format(

@@ -101,12 +101,12 @@ def handle_binfile(bin_file, test_file, test_data):
 def handle_sigfile(sig_file, test_file, test_data):
 
     sig_reader = SIGFileReader()
-    ref_file_data = sig_reader.read_data(sig_file, test_file)
+    ref_file_data, lats, lons = sig_reader.read_data(sig_file, test_file)
 
     decoder = DecodeSIGRIDCodes()
     LOG.info('Decoding sig file with values: {}'.format(np.unique(ref_file_data, return_counts=False)))
     ref_data = decoder.sigrid_decoding(ref_file_data, test_data)
-    return ref_data, low_lim, upp_lim
+    return ref_data, low_lim, upp_lim, lats, lons
 
 
 # def handle_osi_ice_conc_nc_file(input_file):
@@ -159,7 +159,7 @@ def handle_osi_ice_conc_nc_file(input_file):
     status_flag = dataset.variables['status_flag'][0][:]
     ice_conc = np.ma.array(ice_conc, mask=(status_flag != 0))
     ice_conc = np.ma.masked_outside(ice_conc, -0.01, 100.01)
-    return ice_conc
+    return ice_conc, dataset.variables['lat'][0], dataset.variables['lon'][0]
 
 
 def handle_osi_ice_conc_nc_file_osi450(input_file, draft):
@@ -192,4 +192,4 @@ def handle_osi_ice_conc_nc_file_osi450(input_file, draft):
              status_flag & 2 == 2, status_flag & 8 == 8, status_flag & 1 == 1))
     ice_conc = np.ma.array(ice_conc, mask=mask_flags)
     ice_conc = np.ma.masked_outside(ice_conc, -0.01, 100.01)
-    return ice_conc
+    return ice_conc, dataset.variables['lat'][0], dataset.variables['lon'][0]
